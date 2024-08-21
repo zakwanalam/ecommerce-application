@@ -73,9 +73,12 @@ import {
 import OrderRow from "./OrderRow";
 import axios from "axios";
 import OrderCard from "./OrderCard";
+import { Skeleton } from "@/components/ui/skeleton";
+import OrderTableSkeleton from "./OrderTableSkeleton";
 function Orders() {
   const [orders, setOrders] = useState([]);
   const [cardCount, setCardCount] = useState(0);
+  const [hideSkeleton, setHideSkeleton] = useState(false);
   useEffect(() => {
     const getOrders = async () => {
       const allOrders = await axios.get("/api/getOrders");
@@ -111,13 +114,13 @@ function Orders() {
     const timeDifference = now.getTime() - then.getTime();
     return timeDifference <= oneWeekInMs;
   };
-  const isLessThan3Days = (date)=>{
+  const isLessThan3Days = (date) => {
     const then = new Date(date);
     const now = new Date();
     const oneWeekInMs = 3 * 24 * 60 * 60 * 1000;
     const timeDifference = now.getTime() - then.getTime();
     return timeDifference <= oneWeekInMs;
-  }
+  };
   return (
     <div className=" md:pl-14">
       <div className="grid flex-1 absolute items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8 lg:grid-cols-3 xl:grid-cols-3">
@@ -269,38 +272,59 @@ function Orders() {
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead className={"text-center"}>
-                          Customer
-                        </TableHead>
-                        <TableHead className="text-center hidden sm:table-cell">
-                          Type
-                        </TableHead>
-                        <TableHead className=" text-center hidden sm:table-cell">
-                          Status
-                        </TableHead>
-                        <TableHead className="text-center hidden md:table-cell">
-                          Date
-                        </TableHead>
-                        <TableHead className="text-center text-right">
-                          Amount
-                        </TableHead>
+                        {orders.length > 0 ? (
+                          <>
+                            <TableHead className={"text-center"}>
+                              Customer
+                            </TableHead>
+                            <TableHead className="text-center hidden sm:table-cell">
+                              Type
+                            </TableHead>
+                            <TableHead className=" text-center hidden sm:table-cell">
+                              Status
+                            </TableHead>
+                            <TableHead className="text-center hidden md:table-cell">
+                              Date
+                            </TableHead>
+                            <TableHead className="text-center text-right">
+                              Amount
+                            </TableHead>
+                          </>
+                        ) : (
+                          <TableHead className={"text-center"}>
+                            Loading...
+                          </TableHead>
+                        )}
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {orders.map((session, i) => {
-                        if (isLessThanAWeek(session.created)) {
-                          return (
-                            <>
-                              <OrderRow
-                                onClick={() => {
-                                  setCardCount(i);
-                                }}
-                                order={session}
-                              />
-                            </>
-                          );
-                        }
-                      })}
+                      {orders.length > 0 ? (
+                        orders.map((session, i) => {
+                          if (isLessThanAWeek(session.created)) {
+                            return (
+                              <>
+                                <OrderRow
+                                  className={"absolute"}
+                                  onClick={() => {
+                                    setCardCount(i);
+                                  }}
+                                  order={session}
+                                />
+                              </>
+                            );
+                          }
+                        })
+                      ) : (
+                        <>
+                          
+                          <OrderTableSkeleton></OrderTableSkeleton>
+                          <OrderTableSkeleton></OrderTableSkeleton>
+                          <OrderTableSkeleton></OrderTableSkeleton>
+                          <OrderTableSkeleton></OrderTableSkeleton>
+                        </>
+                      )}
+
+                      {/* Skeletons */}
                     </TableBody>
                   </Table>
                 </CardContent>

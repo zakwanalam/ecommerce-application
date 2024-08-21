@@ -73,6 +73,11 @@ function Navbar(props) {
     };
     reader.readAsDataURL(file);
   };
+
+  const EditProfile = ()=>{
+      
+  }
+
   const nav = useNavigate();
   const [showStatusBar, setShowStatusBar] = useState(true);
   const [showActivityBar, setShowActivityBar] = useState(false);
@@ -211,7 +216,7 @@ function Navbar(props) {
                     Upload Image
                   </DropdownMenuItem>
                 </div>
-                <div className="p-2 rounded-bl-md rounded-br-md  bg-slate-200 ">
+                <div className="p-2 pb-0 rounded-bl-md rounded-br-md  bg-slate-200 ">
                   <DropdownMenuItem
                     className={
                       "bg-white flex items-center justify-center text-black cursor-pointer"
@@ -220,6 +225,17 @@ function Navbar(props) {
                     onClick={handleClick}
                   >
                     Logout
+                  </DropdownMenuItem>
+                </div>
+                <div className="p-2 rounded-bl-md rounded-br-md  bg-slate-200 ">
+                  <DropdownMenuItem
+                    className={
+                      "bg-white flex items-center justify-center text-black cursor-pointer"
+                    }
+                    checked={showStatusBar}
+                    onClick={EditProfile}
+                  >
+                    Edit Profile
                   </DropdownMenuItem>
                 </div>
               </DropdownMenuContent>

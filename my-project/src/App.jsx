@@ -31,6 +31,7 @@ import SuccessFullPayment from "./Payments/SuccessFullPayment";
 import UnSuccessFullPayment from "./Payments/UnSuccessFullPayment";
 import LoadingBar from 'react-top-loading-bar'
 import DelayedRender from "./Home/components/DelayedRender";
+import EditProfile from "./EditProfile/EditProfile";
 
 // const productList = [
 //   {
@@ -278,7 +279,7 @@ function App() {
       <LoadingBar
         color='#f11946'
         progress={progress}
-        height={2.2}
+        height={3}
         transitionTime={100}
         onLoaderFinished={() => setProgress(0)}
       />
@@ -323,6 +324,8 @@ function App() {
         <Route path="/login" element={<LoginForm title="Login" />}></Route>
         <Route path="/forgetPassword" element={<ForgetPassword />}></Route>
         <Route path="/cart" element={<Cart />}></Route>
+        <Route path="/editProfile" element={<EditProfile/>}></Route>
+
         <Route path="/product"  element={<ProductPage setProgress = {setProgress}   loginStatus={loginLabel}  />} ></Route>}
       </Routes>
       <Routes>

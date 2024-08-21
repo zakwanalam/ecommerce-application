@@ -145,18 +145,23 @@ app.delete("/api/deleteReview", (req, res) => {
     res.send({ success: false });
   }
 });
+app.get("/api/getSessions", async (req, res) => {
+  const sessions = await stripe.checkout.sessions.list({ limit: 16 });
+
+  res.json({ sessions: sessions.length });
+});
 app.get("/api/getOrders", async (req, res) => {
   try {
-    const sessions = await stripe.checkout.sessions.list();
+    const sessions = await stripe.checkout.sessions.list({ limit: 10 });
     const filteredSessions = sessions.data.filter(
-      (session) => session.payment_status === "paid" 
+      (session) => session.payment_status === "paid"
     );
     const sessionsWithDetails = await Promise.all(
       filteredSessions.map(async (session) => {
         const lineItems = await stripe.checkout.sessions.listLineItems(
           session.id
         );
-        
+
         const paymentIntent = await stripe.paymentIntents.retrieve(
           session.payment_intent
         );
@@ -165,35 +170,36 @@ app.get("/api/getOrders", async (req, res) => {
         const paymentMethod = await stripe.paymentMethods.retrieve(
           paymentMethodId
         );
-        if (session.payment_status === "paid") {
-          const lineItemsWithProductDetails = await Promise.all(lineItems.data.map(async (item) => {
+
+        const lineItemsWithProductDetails = await Promise.all(
+          lineItems.data.map(async (item) => {
             const product = await stripe.products.retrieve(item.price.product);
             return {
               product: {
                 id: product.id,
                 name: product.name,
                 images: product.images,
-                amountTotal: item.amount_total,
-                quantity:item.quantity,
+                amountTotal: (item.amount_total / 100).toFixed(2),
+                quantity: item.quantity,
                 product_id: product.metadata.product_id,
               },
             };
-          }));
-          return {
-            id: session.id,
-            amount_total: session.amount_total,
-            amount_subtotal: session.amount_subtotal,
-            currency: session.currency,
-            card_brand:paymentMethod.card.brand,
-            card_last4:paymentMethod.card.last4,
-            created: new Date(session.created * 1000).toISOString(), 
-            customer_details: await session.customer_details,
-            products: lineItemsWithProductDetails
-          };
-        }
+          })
+        );
+        return {
+          id: session.id,
+          amount_total: (session.amount_total / 100).toFixed(2),
+          amount_subtotal: (session.amount_subtotal / 100).toFixed(2),
+          currency: session.currency,
+          card_brand: paymentMethod.card.brand,
+          card_last4: paymentMethod.card.last4,
+          created: new Date(session.created * 1000).toISOString(),
+          customer_details: await session.customer_details,
+          products: lineItemsWithProductDetails,
+        };
       })
     );
-    
+
     res.json({ success: true, sessions: sessionsWithDetails });
   } catch (error) {
     console.error("Error retrieving Checkout Sessions:", error);
@@ -547,7 +553,7 @@ app.post("/api/checkout", async (req, res) => {
         product_data: {
           name: product.name,
           images: [product.image_main],
-          metadata:{product_id:product.id}
+          metadata: { product_id: product.id },
         },
         unit_amount: Math.round(product.stock.small.price * 100),
       },

@@ -171,7 +171,7 @@ export default function Cart(props) {
               <h5>Total</h5>
               <h5>{total}</h5>
             </li>
-            <li className="flex justify-end  pt-10">
+            <li className="flex justify-end  py-4">
               <Button disabled={disable} onClick={handleCheckout} className={"bg-indigo-600  hover:bg-indigo-700"}>
                   Proceed to Checkout
                 {disable?<ReloadIcon className="ml-2 animate-spin"/>:null}
