@@ -489,27 +489,50 @@ app.post("/api/addToCart", (req, res) => {
     }
   });
 });
-app.post('/api/saveUser',(req,res)=>{
-
-  const userData = req.body
-  const {email,firstName,lastName,address,profile_picture} = userData
-  const fullName = firstName +' '+lastName
-  const query  = `UPDATE users SET fullName=? address = ? profile_picture = ? where email= ?`
-  //Update Cookies
+app.post("/api/saveUser", (req, res) => {
   
-
-  //Update Database
   try {
-    db.query(query,[fullName,address,profile_picture,email],(err,results)=>{
-      if(err){throw err}
-      else{
-        res.send({success:true,msg:"User Updated SuccessFully"})
+const userData = req.body;
+  const { email, firstName, lastName, address, profile_picture } = userData;
+  const fullName = `${firstName} ${lastName}`;
+  const query = `UPDATE users SET fullName = ?, address = ?, profile_picture = ? WHERE email = ?`;
+  console.log(fullName);
+  
+    //Update Database
+    db.query(query,[fullName, address, profile_picture, email],(err, results) => {
+        if (err) {
+          throw err;
+        } 
+        //Update Cookies
+        else {
+          const { token } = req.cookies;
+          const previousToken = jwt.decode(token);
+          const jwtToken = jwt.sign(
+            {
+              email: email,
+              fullName: fullName,
+              address: address,
+            },
+            "secret",
+            {
+              expiresIn: previousToken.exp,
+            }
+          );
+          const expiryDate = previousToken.exp * 1000;
+          const options = {
+            expires: new Date(expiryDate),
+            httpOnly: true,
+          };
+          res
+            .cookie("token", jwtToken, options)
+            .send({ success: true, msg: "User Updated SuccessFully" });
+        }
       }
-    })
+    );
   } catch (error) {
     console.log(error);
   }
-})
+});
 app.get("/api/getUser", (req, res) => {
   try {
     const { token } = req.cookies;

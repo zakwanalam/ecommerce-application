@@ -9,7 +9,7 @@ function EditProfile({setProgress}) {
     address:'',
     profile_picture:''});
   const [imageURI, setImageURI] = useState("");
-  const [skeletonHide, setSkeletonHide] = useState(imageURI !=''?false:true);
+  const [skeletonHide, setSkeletonHide] = useState(userData.profile_picture !=''?false:true);
   
   useEffect(() => {
     const getUser = async () => {
@@ -20,12 +20,19 @@ function EditProfile({setProgress}) {
         firstName: response.data.fullName.split(" ")[0],
         lastName: response.data.fullName.split(" ")[1],
         address: response.data.address,
+        profile_picture:picture.data.profile_picture
       });
-      setImageURI((await picture).data.profile_picture)
     };
     getUser();
   }, []);
 
+  const onDataChange = (e)=>{
+    const {name,value} = e.target
+    setUserData({
+      ...userData,
+      [name]:value
+    })
+  }
 
   const uploadImage = async (e) => {
     const file = e.target.files[0];
@@ -49,8 +56,7 @@ function EditProfile({setProgress}) {
   const loadingNavigation =   useLoadingNavigation(setProgress)
 
   const handleSaveChanges = async()=>{
-    const response = axios.post('/api/saveUser')
-    
+    const saveUser = await axios.post('/api/saveUser',userData)
     loadingNavigation('/home')
     
   }
@@ -68,7 +74,7 @@ function EditProfile({setProgress}) {
               className="relative  items-center h-44 w-40"
             >
               <img
-                src={userData.profile_picture!=null?userData.profile_picture:'https://github.com/shadcn.png'}
+                src={userData.profile_picture}
                 hidden={!skeletonHide}
                 class="rounded-full aspect-square w-40 object-cover absolute hover:cursor-pointer  mb-5 "
               />
@@ -112,6 +118,7 @@ function EditProfile({setProgress}) {
                 id="email"
                 name="email"
                 disabled
+                onChange={onDataChange}
                 value={userData?.email}
                 class="shadow bg-slate-200 appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                 placeholder="Enter your email"
@@ -126,6 +133,7 @@ function EditProfile({setProgress}) {
                 type="text"
                 id="firstName"
                 name="firstName"
+                onChange={onDataChange}
                 value={titleCase(userData?.firstName)}
                 class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                 placeholder="Enter your first name"
@@ -139,7 +147,8 @@ function EditProfile({setProgress}) {
               <input
                 type="url"
                 id="website"
-                name="website"
+                name="lastName"
+                onChange={onDataChange}
                 value={titleCase(userData?.lastName)}
                 class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                 placeholder="Enter your website URL"
@@ -152,8 +161,9 @@ function EditProfile({setProgress}) {
               </label>
               <input
                 type="url"
-                id="facebook"
-                name="facebook"
+                id="address"
+                name="address"
+                onChange={onDataChange}
                 value={titleCase(userData?.address)}
                 class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                 placeholder="Enter your complete address"
