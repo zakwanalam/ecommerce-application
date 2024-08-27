@@ -250,7 +250,7 @@ function App() {
       return newCart;
     });
   };
-  const isHome = location.pathname === "/home" || location.pathname=== "/product";
+  const isHome = location.pathname === "/home" || location.pathname=== "/product" ;
   const [animation, setAnimation] = useState("");
   const productSelected = true;
   useEffect(() => {
@@ -283,7 +283,7 @@ function App() {
         transitionTime={100}
         onLoaderFinished={() => setProgress(0)}
       />
-      {isHome&& (
+      {isHome && (
         <>
           {loginLabel === "Logout" && appMode === "user" ? (
             <Cart
@@ -300,6 +300,7 @@ function App() {
             setShowCart={setCartVisibility}
             userData={userData}
             setProgress={setProgress}
+            productList={productList}
             profile_picture={profile_picture ? profile_picture : ""}
           />
         </>
@@ -324,9 +325,8 @@ function App() {
         <Route path="/login" element={<LoginForm title="Login" />}></Route>
         <Route path="/forgetPassword" element={<ForgetPassword />}></Route>
         <Route path="/cart" element={<Cart />}></Route>
-        <Route path="/editProfile" element={<EditProfile/>}></Route>
-
-        <Route path="/product"  element={<ProductPage setProgress = {setProgress}   loginStatus={loginLabel}  />} ></Route>}
+        <Route path="/editProfile" element={<EditProfile setProgress={setProgress}/>}></Route>
+        <Route path="/product"  element={<ProductPage setProgress = {setProgress}  loginStatus={loginLabel}  />} ></Route>}
       </Routes>
       <Routes>
         <Route path="/paymentSuccess" element={<SuccessFullPayment />}></Route>

@@ -19,7 +19,7 @@ function Hero(props) {
         {/* <div className="absolute w-full h-full bg-black/40"></div> */}
         <div className="heroBackground"></div>
           <div className="heroText">
-            <div className="absolute flex w-full h-full flex-col w-85 items-start left-24 justify-center max-lg:items-center max-lg:left-0">
+            <div className="absolute container flex w-full h-full flex-col w-85 items-start left-24 justify-center max-lg:items-center max-lg:left-0">
               <h1  className="text-orange-500  flex flex-col  text-left text-7xl leading-tight font-bold max-lg:text-center max-lg:text-5xl max-lg:leading-tight max-lg:pt-10 ">
                 Best Quality Shoes! <div className="max-lg:italic max-lg:text-orange-500">
                 Buy Now</div>

@@ -22,6 +22,7 @@ import {
 import { DropdownMenuContent } from "@radix-ui/react-dropdown-menu";
 import { Skeleton } from "@/components/ui/skeleton";
 import useLoadingNavigation from "@/LoadingNavigation/LoadingNavigation";
+import SearchBar from "./SearchBar";
 function Navbar(props) {
   const navigate = useNavigate();
   const loginClassName =
@@ -75,7 +76,7 @@ function Navbar(props) {
   };
 
   const EditProfile = ()=>{
-      
+    loadingNavigation('/editProfile')
   }
 
   const nav = useNavigate();
@@ -84,7 +85,7 @@ function Navbar(props) {
   const [showPanel, setShowPanel] = useState(false);
   const loadingNavigation = useLoadingNavigation(props.setProgress);
   return (
-    <nav className=" text-white px-5  max-w-screen-xl max-sm:max-w-md   max-xl:scale-[92%]   rounded-full translate-x-[-50%] left-[50%]  mt-8 bg-indigo-900 z-20 shadow-xl w-screen absolute border-gray-200 dark:bg-gray-900 dark:border-gray-700">
+    <nav className=" text-white px-5 container  max-w-[1350px] max-md:max max-sm:max-w-md   max-xl:scale-[92%]   rounded-full translate-x-[-50%] left-[50%]  mt-8 bg-indigo-900 z-20 shadow-xl w-screen absolute border-gray-200 dark:bg-gray-900 dark:border-gray-700">
       <div className="max-w-screen-xl flex  items-center justify-between mx-auto my-0 ">
         <a
           onClick={() => {
@@ -113,13 +114,13 @@ function Navbar(props) {
                   document.getElementById("recentProducts")?.scrollIntoView({ behavior: 'smooth' });
                 }
               }}
-              className="  rounded  md:hover:bg-transparent  md:border-0 md:hover:text-orange-400 md:p-0 dark:text-white  dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent"
+              className="  rounded  md:hover:bg-transparent      md:border-0 md:hover:text-orange-400 md:p-0 dark:text-white  dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent"
             >
               Shop
             </a>
           </li>
           <li
-            className="md:px-10 px-6"
+            className=" pl-10"
             hidden={props.loginStatus === "Login" ? true : false}
             onClick={() => {
               props.setShowCart();
@@ -159,6 +160,9 @@ function Navbar(props) {
               <circle cx="34" cy="19" r="2" />
               <circle cx="16" cy="19" r="2" />
             </svg>
+          </li>
+          <li className="px-10">
+            <SearchBar setProgress={props.setProgress} productList={props.productList}/>
           </li>
           <li>
             <button
