@@ -86,6 +86,22 @@ export function LoginForm(props) {
     });
   };
 
+  useEffect(()=>{
+    const handleKeyPress = (event)=>{
+      if(event.key==='Enter'){
+        document.getElementById('submit').click()
+      }
+      else{
+        console.log('Not enter');
+      }
+    }
+
+    window.addEventListener('keydown',handleKeyPress);
+
+    return ()=>{
+      window.addEventListener('keydown',handleKeyPress)
+    }
+  },[])
   return (
     <div className="flex justify-center bg-indigo-950 items-center min-w-md min-h-screen">
       <Card className="mx-auto max-w-sm items-center">
@@ -135,6 +151,7 @@ export function LoginForm(props) {
             >
               <Button
                 type="submit"
+                id="submit"
                 className="w-full bg-indigo-500 hover:bg-indigo-700"
               >
                 Login

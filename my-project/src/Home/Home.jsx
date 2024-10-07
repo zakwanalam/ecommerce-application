@@ -19,6 +19,10 @@ function Home(props) {
       <RecentProducts
         productList={props.productList}
         addToCart={props.addToCart}
+        sortType = {props.sortType}
+        setSortType = {props.setSortType}
+        category = {props.category}
+        setCategory = {props.setCategory}
         setProgress={props.setProgress}
         isProductSelected={props.isProductSelected}
       />

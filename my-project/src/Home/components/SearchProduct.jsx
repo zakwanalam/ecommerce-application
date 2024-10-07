@@ -7,7 +7,7 @@ function SearchProduct({product,setProgress,onClick}) {
   return (
     <div
       onClick={onClick}
-      className="py-3 w-[280px] text-center flex relative  text-black bg-gray-100 rounded-lg"
+      className="py-3 w-[280px] text-center my-1 flex relative  text-black bg-gray-100 rounded-lg"
     >
       <img
         className="w-12 rounded-md ml-2 h-10"

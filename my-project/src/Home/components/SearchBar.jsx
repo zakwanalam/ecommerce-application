@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import SearchProduct from "./SearchProduct";
 import useLoadingNavigation from "@/LoadingNavigation/LoadingNavigation";
 
-function SearchBar({ productList, setProgress }) {
+function SearchBar({ productList, setProgress,searchIconClicked=false ,animate}) {
   const [value, setValue] = useState("");
   const handleSearch = (e) => {
     const query = e.target.value;
@@ -28,11 +28,11 @@ function SearchBar({ productList, setProgress }) {
     console.log(filteredProducts);
   }, [value]);
   const loadingNavigate = useLoadingNavigation(setProgress);
-
+  
   return (
     <>
-      <div class="relative rounded-3xl shadow-xl sm:max-w-lg">
-        <div class="mx-auto max-w-md">
+      <div className={`relative  rounded-3xl shadow-xl max-md:opacity-0 max-md:absolute ${animate? (searchIconClicked===true ? 'visible max-md:animate-slide-inY':' max-md:animate-slide-outY'):''} max-md:absolute max-md:bg-indigo-700 max-md:p-3 max-md:rounded-xl max-md:mt-8 max-md:-z-40 max-md:right-0`}>
+        <div class="mx-auto ">
           <form action="" class="relative mx-auto w-max">
             <input
               type="search"
@@ -40,7 +40,7 @@ function SearchBar({ productList, setProgress }) {
               placeholder="Search Products"
               value={value}
               onChange={handleSearch}
-              class="peer cursor-pointer relative z-10 h-12 w-12 rounded-full border bg-transparent pl-12 outline-none w-full  focus:cursor-text focus:border-lime-300 focus:pl-16 focus:pr-4"
+              class="peer cursor-pointer placeholder:text-white relative z-10 h-12  w-12 rounded-full border bg-transparent pl-12 outline-none w-full  focus:cursor-text focus:border-lime-300 focus:pl-16 focus:pr-4"
             />
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -63,7 +63,7 @@ function SearchBar({ productList, setProgress }) {
         <form
           id="result-div"
           style={{ zIndex: 500 }}
-          className="overflow-y-auto absolute  bg-slate-200 p-2  mt-2 rounded-md max-h-60 flex  flex-col opacity-0 "
+          className="overflow-y-auto absolute max-md:right-0 max-md:top-36 max-md:p-3   bg-slate-200 p-2  mt-3 rounded-md max-h-60 flex  flex-col opacity-0 "
         >
           {filteredProducts.map((product) => {
             const query = {
@@ -71,6 +71,8 @@ function SearchBar({ productList, setProgress }) {
               name: product.name,
               price: product.stock.small.price,
               image: product.image_main,
+              secondaryImage1:product.image_secondary_1,
+              secondaryImage2:product.image_secondary_2,
               description: product.description,
             };
             return (

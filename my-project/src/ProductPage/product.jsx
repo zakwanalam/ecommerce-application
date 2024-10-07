@@ -14,6 +14,11 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import axios from "axios";
 import { Skeleton } from "@mui/material";
 import Review from "./components/Review";
+import backArrow from '../assets/back.svg'
+import { boolean } from "zod";
+import { loadStripe } from "@stripe/stripe-js";
+import { Toaster } from "@/components/ui/toaster";
+import { toast, useToast } from "@/components/ui/use-toast";
 
 function ProductPage(props) {
   const [user, setUser] = useState({});
@@ -25,8 +30,8 @@ function ProductPage(props) {
     };
     getUser();
   }, []);
-  
-  
+
+
   const [rating, setValue] = useState(1);
   const [review, setReview] = useState("");
   const date = Date(Date.now());
@@ -36,22 +41,105 @@ function ProductPage(props) {
     console.log("Rting", rating);
   }, [rating]);
 
+  const [quantity, setQuantity] = useState(1);
 
-
+  const handleIncrement = () => {
+    setQuantity((prev) => prev + 1)
+  }
+  const handleDecrement = () => {
+    if (quantity > 1) {
+      setQuantity((prev) => prev - 1)
+    }
+  }
   const location = useLocation();
 
-  const { id, name, price, image, description } = location.state || {};
+  const { id, name, price, image, description, secondaryImage1, secondaryImage2, index } = location.state || {};
+
+  const [animate, setAnimate] = useState(false)
+  let [imageArray, setImageArray] = useState([image, secondaryImage1, secondaryImage2].filter(Boolean))
+  let [imageCount, setImageCount] = useState(0)
+
+  const moveToPreviousImage = () => {
+    setAnimate(false)
+    setTimeout(() => {
+      setAnimate(true)
+      if (imageCount > 0) {
+        console.log('previous image');
+        setImageCount(--imageCount);
+      }
+      else {
+        setImageCount((imageArray.length - 1))
+      }
+    }, 30)
+
+  }
+
+  const moveToNextImage = () => {
+    setAnimate(false)
+    setTimeout(() => {
+      setAnimate(true)
+      setImageCount((imageCount + 1) % imageArray.length)
+
+    }, 30)
+  }
+
+
+
+  const handleBuyNow = async () => {
+    const stripe = await loadStripe('pk_test_51NDIgmQY69KQ4gJjN1tgyaVi6r5hi6L8l1BlEWQhdEoM8DR5NPC46Ql8ae3WkTwzpSXpBMX5qvpQzCK1g1LxaHmo00nuCOYQpr'); // Use your publishable key here
+    try {
+      const products = [{
+        id: id,
+        name: name,
+        image_main: image,
+        stock: {
+          small: {
+            price: price
+          }
+        },
+        quantity: quantity,
+      }]
+      const tax = price * 13 / 100
+      const shipping = 10
+      const discount = 0
+      const response = await axios.post('/api/checkout', {
+        products: products,
+        tax: tax,
+        discount: discount,
+        shipping: shipping,
+      });
+      console.log('checout ongoing');
+
+      const result = await stripe.redirectToCheckout({
+        sessionId: response.data.id,
+      });
+
+      if (result.error) {
+        console.error(result.error.message);
+      }
+    } catch (error) {
+      console.error('Error during checkout:', error);
+    }
+  }
+
+  const {toast} = useToast()
+  const addToCart = () => {
+    props.addToCart(index, quantity)
+    toast({
+      title:`Item Added: ${name} `
+    })
+
+  }
   const [filteredReviews, setfilteredReviews] = useState([]);
   useEffect(() => {
     const profilePic = async () => {
       const res = await axios.get("/api/getProfilePic");
       setImageURI(res.data.profile_picture);
       console.log("mageeuri", res.data.profile_picture);
-
     };
     const getReviews = async () => {
       const res = await axios.get("/api/getReviews");
-      setfilteredReviews(res.data.reviews.filter((review)=>review.product_id===id));
+      setfilteredReviews(res.data.reviews.filter((review) => review.product_id === id));
     };
     profilePic();
     getReviews();
@@ -72,7 +160,7 @@ function ProductPage(props) {
       email: user.email || "",
       rating: rating || "",
       review: review || "",
-      date:new Date(Date.now()),
+      date: new Date(Date.now()),
     };
 
     setDisabled(true); // Disable button when submitting
@@ -93,17 +181,41 @@ function ProductPage(props) {
 
   return (
     <>
-      <section className="relative pt-36 bg-indigo-950 px-1 text-left ">
+      <section className="relative pt-36 lg:pl-36 bg-indigo-950 px-1 text-left ">
         <div className="w-full mx-auto px-4 sm:px-6 lg:px-0">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 mx-auto max-md:px-2 ">
             <div className="img">
               <div className="img-box h-full max-lg:mx-auto ">
-                <img
-                  src={image}
-                  
-                  alt="Yellow Tropical Printed Shirt image"
-                  className="max-lg:mx-auto lg:rounded-r-2xl max-lg:rounded-2xl aspect-square ml-36 max-lg:w-full max-lg:h-96 shadow-lg shadow-indigo-600/50 lg:ml-auto h-screen max-sm:max-h-[600px] object-cover"
-                />
+                <div className='w-full  h-4/5 relative overflow-clip max-lg:w-full  max-lg:h-96 max-sm:max-h-[600px] '>
+                  <img
+                    src={imageArray[imageCount]}
+                    className={`${animate ? 'animate-slide-in' : ''} object-cover shadow-lg absolute h-full w-full lg:rounded-2xl  max-lg:rounded-2xl    shadow-indigo-600/50 `}
+                  />
+                  <div onClick={moveToPreviousImage} className="w-1/2 opacity-0 flex items-center justify-center  translate-x-[-42%]  h-full scale-110   rounded-r-full bg-black/10 absolute transition-opacity duration-300 hover:opacity-100">
+                    <img className="scale-[30%] absolute ml-10 opacity-60  aspect-square" src={backArrow} alt="" />
+                  </div>
+                  <div onClick={moveToNextImage} className="w-1/2 opacity-0 flex items-center justify-center translate-x-[+42%]  h-full scale-110 right-0  transition-opacity duration-300  rounded-l-full bg-black/10 absolute hover:opacity-100">
+                    <img className="scale-[30%] absolute rotate-180  mr-10 opacity-60  aspect-square" src={backArrow} alt="" />
+                  </div>
+                </div>
+                <div className='w-1/3 flex gap-4 mt-4'>
+                  {
+                    secondaryImage1 != '' ?
+                      <img
+                        src={secondaryImage1}
+                        className="w-20 rounded-lg cursor-pointer aspect-square  "
+                      />
+                      : ''
+                  }
+                  {
+                    secondaryImage2 != '' ?
+                      <img
+                        src={secondaryImage2}
+                        className="w-20 cursor-pointer rounded-lg aspect-square  "
+                      />
+                      : ''
+                  }
+                </div>
               </div>
             </div>
             <div className="data w-full lg:pr-8 pr-0 xl:justify-start flex items-center max-lg:pb-10 xl:my-2 lg:my-5 my-0">
@@ -324,7 +436,9 @@ function ProductPage(props) {
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 py-8">
                   <div className="flex sm:items-center sm:justify-center w-full">
-                    <button className="group py-4 px-6 border border-gray-400 rounded-l-full bg-white transition-all duration-300 hover:bg-gray-50 hover:shadow-sm hover:shadow-gray-300">
+                    {/* decrease quanitity */}
+
+                    <button id="decrementQuantity" onClick={handleDecrement} className="group py-4 px-6 border border-gray-400 rounded-l-full bg-white transition-all duration-300 hover:bg-gray-50 hover:shadow-sm hover:shadow-gray-300">
                       <svg
                         className="stroke-gray-900 group-hover:stroke-black"
                         width={22}
@@ -356,11 +470,13 @@ function ProductPage(props) {
                       </svg>
                     </button>
                     <input
-                      type="text"
+                      id="qntSelector"
+                      readOnly
                       className="font-semibold cursor-pointer text-lg py-[13px] px-6 w-full sm:max-w-[118px] outline-0 border-y border-gray-400 bg-white placeholder:text-gray-900 text-center hover:bg-gray-50"
-                      placeholder={1}
+                      value={quantity}
                     />
-                    <button className="group py-4 px-6 border border-gray-400 rounded-r-full bg-white transition-all duration-300 hover:bg-gray-50 hover:shadow-sm hover:shadow-gray-300">
+                    {/* increase quanitity */}
+                    <button id="incrementQuantity" onClick={handleIncrement} className="group py-4 px-6 border border-gray-400 rounded-r-full bg-white transition-all duration-300 hover:bg-gray-50 hover:shadow-sm hover:shadow-gray-300">
                       <svg
                         className="stroke-gray-900 group-hover:stroke-black"
                         width={22}
@@ -392,7 +508,7 @@ function ProductPage(props) {
                       </svg>
                     </button>
                   </div>
-                  <button className="group py-4 px-5 rounded-full bg-indigo-50 text-indigo-600 font-semibold text-lg w-full flex items-center justify-center gap-2 transition-all duration-500 hover:bg-indigo-100">
+                  <button onClick={addToCart} className="group py-4 px-5 rounded-full bg-indigo-50 text-indigo-600 font-semibold text-lg w-full flex items-center justify-center gap-2 transition-all duration-500 hover:bg-indigo-100">
                     <svg
                       className="stroke-indigo-600 "
                       width={22}
@@ -408,8 +524,12 @@ function ProductPage(props) {
                         strokeLinecap="round"
                       />
                     </svg>
+
                     Add to cart
                   </button>
+                  <Toaster/>
+
+
                 </div>
                 <div className="flex items-center gap-3">
                   <button className="group transition-all duration-500 p-4 rounded-full bg-indigo-50 hover:bg-indigo-100 hover:shadow-sm hover:shadow-indigo-300">
@@ -430,7 +550,7 @@ function ProductPage(props) {
                       />
                     </svg>
                   </button>
-                  <button className="text-center w-full px-5 py-4 rounded-[100px] bg-indigo-600 flex items-center justify-center font-semibold text-lg text-white shadow-sm transition-all duration-500 hover:bg-indigo-700 hover:shadow-indigo-400">
+                  <button onClick={handleBuyNow} className="text-center w-full px-5 py-4 rounded-[100px] bg-indigo-600 flex items-center justify-center font-semibold text-lg text-white shadow-sm transition-all duration-500 hover:bg-indigo-700 hover:shadow-indigo-400">
                     Buy Now
                   </button>
                 </div>
@@ -570,26 +690,26 @@ function ProductPage(props) {
             </li>
           </ul>
           <div className="pb-5 pt-10  rounded-xl mt-12 ">
-            {filteredReviews.length>0 &&
-            <div className="w-full ">
-              <h1 className="text-2xl text-white  font-semibold pb-10 ">Product Reviews</h1>
-              
-              {filteredReviews.map((review, key) => {
-                  return <Review  review={review} />;
-              })}
-            </div>
-          }
+            {filteredReviews.length > 0 &&
+              <div className="w-full ">
+                <h1 className="text-2xl text-white  font-semibold pb-10 ">Product Reviews</h1>
+
+                {filteredReviews.map((review, key) => {
+                  return <Review review={review} />;
+                })}
+              </div>
+            }
           </div>
-          
+
         </div>
-        <fieldset className="bg-indigo-900 py-20  px-5 xl:px-48 " disabled={props.loginStatus === 'Login' ? true:false}>
+        <fieldset className="bg-indigo-900 py-20  px-5 xl:px-48 " disabled={props.loginStatus === 'Login' ? true : false}>
           <div className="pb-5 pt-10  text-white bg-indigo-500 shadow-indigo-800 shadow-2xl  rounded-xl  ">
             <h1 className="text-2xl font-semibold mb-8 ">Write A Review</h1>
             <div className="flex-col  justify-start items-start pl-9">
               <div className="flex">
                 <Avatar>
                   <AvatarImage
-                    src={  imageURI && props.loginStatus==='Logout'? imageURI : "https://github.com/shadcn.png"}
+                    src={imageURI && props.loginStatus === 'Logout' ? imageURI : "https://github.com/shadcn.png"}
                     alt="@shadcn"
                   />
                   <AvatarFallback
@@ -613,12 +733,12 @@ function ProductPage(props) {
             </div>
             <div className="flex-col pl-9 pr-9  text-white w-full justify-center pt-8 items-center mb-10 max-md:flex-col">
               <input
-                placeholder={props.loginStatus==='Login'?'Login to write review':"Add a review"}
+                placeholder={props.loginStatus === 'Login' ? 'Login to write review' : "Add a review"}
                 id="input"
                 value={review}
-                style={{borderWidth:'2px'}}
+                style={{ borderWidth: '2px' }}
                 onChange={(e) => setReview(e.target.value)}
-                className={`w-full ${props.loginStatus==='Login'?'placeholder:text-red-700':''} pb-32 placeholder:text-gray-200 border-gray-700  mb-8 bg-transparent rounded-md `}
+                className={`w-full ${props.loginStatus === 'Login' ? 'placeholder:text-red-700' : ''} pb-32 placeholder:text-gray-200 border-gray-700  mb-8 bg-transparent rounded-md `}
                 type="text"
               ></input>
               <Button
@@ -629,7 +749,8 @@ function ProductPage(props) {
               </Button>
             </div>
           </div>
-          </fieldset>
+        </fieldset>
+        
       </section>
     </>
   );

@@ -17,7 +17,9 @@ export default function Cart(props) {
   const [tax, setTax] = useState(0);
   const [discount, setDiscount] = useState(0);
   const [total, setTotal] = useState(0);
-  const [disable,setDisable] = useState(false)
+  const [disable,setDisable] = useState((props.cart.length > 0 )?false:true)
+
+
   useEffect(() => {
     let x = 0;
     props.cart.forEach((product) => {
@@ -28,8 +30,12 @@ export default function Cart(props) {
     setDiscount(0);
     setShipping(10);
     setTotal("$" + [subtotal + shipping + tax + discount].toString());
+
+    setDisable(props.cart.length===0 || clicked)
+    
   });
 
+  
   const increment = () => {
     setQuantity((prevQuantity) => prevQuantity + 1);
   };
@@ -40,7 +46,12 @@ export default function Cart(props) {
     }
   };
 
+  
+
+  const [clicked,setClicked] = useState(false)
+
     const handleCheckout = async () => {
+      setClicked((prev)=>true)
       setDisable((prev)=>true)
     const stripe = await loadStripe('pk_test_51NDIgmQY69KQ4gJjN1tgyaVi6r5hi6L8l1BlEWQhdEoM8DR5NPC46Ql8ae3WkTwzpSXpBMX5qvpQzCK1g1LxaHmo00nuCOYQpr'); // Use your publishable key here
     try {
@@ -172,9 +183,9 @@ export default function Cart(props) {
               <h5>{total}</h5>
             </li>
             <li className="flex justify-end  py-4">
-              <Button disabled={disable} onClick={handleCheckout} className={"bg-indigo-600  hover:bg-indigo-700"}>
+              <Button disabled={disable} onClick={handleCheckout} className={`bg-indigo-600  hover:bg-indigo-700`}>
                   Proceed to Checkout
-                {disable?<ReloadIcon className="ml-2 animate-spin"/>:null}
+                {disable && clicked?<ReloadIcon className="ml-2 animate-spin"/>:null}
               </Button>
             </li>
           </ul>

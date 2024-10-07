@@ -78,6 +78,14 @@ module.exports = {
           from: { transform: "translateX(0%)" },
           to: { transform: "translateX(-100%)" },
         },
+        "slide-inY": {
+          from: { transform: "translateY(-100%)",opacity:'0%' },
+          to: { transform: "translateY(0%)" ,opacity:'100%' },
+        },
+        "slide-outY": {
+          from: { transform: "translateY(0%)",opacity:'100%' },
+          to: { transform: "translateY(-100%)" ,opacity:'0%' },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
@@ -85,6 +93,8 @@ module.exports = {
         "caret-blink": "caret-blink 1.25s ease-out infinite",
         "slide-in": "slide-in 0.5s ease-in-out forwards",
         "slide-out": "slide-out 0.5s ease-in-out forwards",
+        "slide-inY": "slide-inY 0.5s ease-in-out forwards",
+        "slide-outY": "slide-outY 0.5s ease-in-out forwards",
       },
     },
   },

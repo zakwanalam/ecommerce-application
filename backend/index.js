@@ -83,6 +83,7 @@ app.post("/api/saveReview", (req, res) => {
       if (err) {
         throw err;
       }
+      console.log(review,'Review Sent');
       res.send({ success: true });
     });
   } catch (error) {
@@ -277,6 +278,7 @@ app.get("/api/signup", (req, res) => {
         email: email,
         fullName: fullName,
         address: address,
+        profile_picture:'https://avatars.githubusercontent.com/u/124599?v=4',
         password: hashedPassword,
         expiry: expiryDate,
         verifyCode: verifyCode,
@@ -545,21 +547,29 @@ app.get("/api/getUser", (req, res) => {
 app.get("/api/getCart", (req, res) => {
   const email = jwt.decode(req.cookies.token).email;
   const query = "SELECT cart FROM usercart WHERE email = ?";
-  db.query(query, email, (err, results) => {
-    if (err) {
-      res.send({ success: false, msg: "Cannot fetch from database" });
-    }
-
-    if (results.length > 0 && results[0].cart != undefined) {
-      res.send({
-        cart: JSON.parse(results[0].cart),
-        success: true,
-        msg: "Cart fetched successfully",
-      });
-    } else {
-      res.send({ success: false, msg: "Cart Not Found" });
-    }
-  });
+  try {
+    db.query(query, email, (err, results) => {
+      if (err) {
+        res.send({ success: false, msg: "Cannot fetch from database" });
+      }
+  
+     try {
+       if (results.length > 0 && results[0].cart != undefined) {
+         res.send({
+           cart: JSON.parse(results[0].cart),
+           success: true,
+           msg: "Cart fetched successfully",
+         });
+       } else {
+         res.send({ success: false, msg: "Cart Not Found" });
+       }
+     } catch (error) {
+      console.log(error);
+     }
+    });
+  } catch (error) {
+    console.log(error);
+  }
 });
 
 app.get("/api/loadUserData", (req, res) => {
@@ -572,7 +582,7 @@ app.get("/api/loadUserData", (req, res) => {
   }
 });
 
-// * ADMIN API's
+// * ADMIN API's 
 
 app.get("/api/verifyAdmin", verifyAdmin);
 app.get("/api/verifyAdminSession", verifyAdminSession);
@@ -643,6 +653,7 @@ app.post("/api/checkout", async (req, res) => {
       });
     }
 
+    
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ["card"],
       line_items: lineItems,

@@ -20,7 +20,7 @@ function EditProfile({setProgress}) {
         firstName: response.data.fullName.split(" ")[0],
         lastName: response.data.fullName.split(" ")[1],
         address: response.data.address,
-        profile_picture:picture.data.profile_picture
+        profile_picture:picture.data?.profile_picture
       });
     };
     getUser();
@@ -62,7 +62,7 @@ function EditProfile({setProgress}) {
   }
   return (
     <div class="bg-indigo-950 conta  absolute flex items-center  justify-center w-screen h-screen font-sans">
-      <div class="container w-[1400px] bg-orange-400   rounded-lg  shadow-lg">
+      <div style={{ background: 'linear-gradient(to right, #FF4D4D, #FFB74D)'}} class="container w-[1400px] rounded-lg  shadow-lg">
         <div class="flex max-sm:flex-col justify-center py-20 max-sm:pt-20 max-sm:items-center gap-4 p-10  items-start">
           <div class="flex flex-col  max-sm:items-center placeholder:px-5 justify-center items-start mb-5">
             <div
@@ -96,6 +96,7 @@ function EditProfile({setProgress}) {
                 </h1>
               </div>
             </div>
+            
             <div>
               <p class="font-semibold text-left max-sm:text-center text-gray-700">
                 {titleCase(userData?.firstName + " " + userData?.lastName)}
@@ -106,7 +107,7 @@ function EditProfile({setProgress}) {
             </div>
           </div>
           <div class="flex px-5 flex-col w-screen text-left gap-6">
-            <h2 class="text-3xl font-bold text-gray-800 mb-6">
+            <h2 class="text-3xl font-bold max-sm:text-center text-gray-800 mb-6">
               Account Settings
             </h2>
             <div>

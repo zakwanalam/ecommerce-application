@@ -39,6 +39,22 @@ function Signup() {
       console.error("Error submitting form:", error);
     }
   };
+  useEffect(()=>{
+    const handleKeyPress = (event)=>{
+      if(event.key==='Enter'){
+        document.getElementById('signup').click()
+      }
+      else{
+        console.log('Not enter');
+      }
+    }
+
+    window.addEventListener('keydown',handleKeyPress);
+
+    return ()=>{
+      window.addEventListener('keydown',handleKeyPress)
+    }
+  },[])
   return (
     <div className="flex justify-center bg-indigo-950 items-center min-h-screen p-4 ">
       <div className="w-full max-w-sm bg-white p-8 rounded-lg shadow-md">
@@ -117,6 +133,7 @@ function Signup() {
           <button
             className="w-full px-4 py-2 text-white bg-indigo-600 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
             type="button"
+            id="signup"
             onClick={async () => { 
               
                 //VALIDATION CHECKS

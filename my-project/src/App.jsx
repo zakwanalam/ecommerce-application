@@ -19,14 +19,12 @@ import { LoginForm } from "./login/Login";
 import Home from "./Home/Home";
 import ForgetPassword from "./forgetPassword/ForgetPassword";
 import Cart from "./cart/cart";
-import Admin from "./Admin/adminLogin";
 import Product from "./ProductPage/product";
 import ProductPage from "./ProductPage/product";
 import Navbar from "./Home/components/navbar";
 import React from "react";
 import axios from "axios";
 import Footer from "./Home/components/footer";
-import Dashboard from "./Admin/dashboard";
 import SuccessFullPayment from "./Payments/SuccessFullPayment";
 import UnSuccessFullPayment from "./Payments/UnSuccessFullPayment";
 import LoadingBar from 'react-top-loading-bar'
@@ -179,8 +177,8 @@ function App() {
     getProduct();
     checkSessionAndFetchCart();
   }, []); // Empty dependency array ensures this runs only once
-
-  const addToCart = async (index) => {
+  
+  const addToCart = async (index , quantity=1) => {
     const { image_secondary_1, image_secondary_2, ...productWithoutImage } =
       productList[index];
 
@@ -188,12 +186,13 @@ function App() {
       const myCart = [...prevCart];
       myCart.push({
         ...productWithoutImage,
-        quantity: 1,
+        quantity: quantity,
       });
       // Save the updated cart to the database
       saveCartToDatabase(myCart);
       return myCart;
     });
+    
   };
 
   const saveCartToDatabase = async (cart) => {
@@ -274,6 +273,8 @@ function App() {
   };
   const [progress, setProgress] = useState(0)
 
+  const [category,setCategory]  = useState('all')
+  const [sortType,setSortType] = useState('asc')
   return (
     <React.Fragment>
       <LoadingBar
@@ -314,6 +315,10 @@ function App() {
               addToCart={addToCart}
               productList={productList}
               cart={cart}
+              category = {category}
+              setCategory = {setCategory}
+              sortType = {sortType}
+              setSortType = {setSortType}
               loginStatus={loginLabel}
               setShowCart={setCartVisibility}
               isProductSelected={isProductSelected}
@@ -326,7 +331,7 @@ function App() {
         <Route path="/forgetPassword" element={<ForgetPassword />}></Route>
         <Route path="/cart" element={<Cart />}></Route>
         <Route path="/editProfile" element={<EditProfile setProgress={setProgress}/>}></Route>
-        <Route path="/product"  element={<ProductPage setProgress = {setProgress}  loginStatus={loginLabel}  />} ></Route>}
+        <Route path="/product"  element={<ProductPage addToCart={addToCart} setProgress = {setProgress}  loginStatus={loginLabel}  />} ></Route>}
       </Routes>
       <Routes>
         <Route path="/paymentSuccess" element={<SuccessFullPayment />}></Route>
