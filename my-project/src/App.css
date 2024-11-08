@@ -8,6 +8,7 @@
   text-align: center;
   overflow-x: hidden;
   font-family:'Poppins',sans-serif;
+  background-color: #1E1B4B;
 }
 * {
   font-family: 'Poppins', sans-serif;
@@ -93,18 +94,19 @@
   color: #888;
 }
 
-#product{
+#product {
   width: 20rem;
-  margin:1.5rem 0 1.5rem 0;
+  margin: 1.5rem 0;
   position: relative;
   margin-left: 0.75rem;
   margin-right: 0.75rem;
   z-index: 10;
 }
-@media (max-width:500px)  {
-    #product{
-      width: 12rem;
-    }
+
+@media (min-width: 300px) and (max-width:650px) {
+  #product {
+    width: 12rem;
+  }
 }
 #recentProducts {
   animation: fadeIn 1s ease-in-out forwards;
@@ -151,16 +153,14 @@ html{
   filter: blur(1rem);
 }
 #hero-image{
-    width: 600px;
+    width: 550px;
     scale: 110%;
     position: absolute;
-    right: 10%;
+    right: 9%;
+    top:4%;
     z-index: 10;
     rotate:-15deg;
-
     /* mobile view */
-   
-    
     object-fit: cover;
     transform: translateY(-50px);
     filter: drop-shadow(10px 10px 30px rgb(128, 3, 253));
@@ -174,8 +174,10 @@ html{
       width: 280px;
       right: -18px;
     }
-    
   }
+
+
+
   #hero-image:hover {
     transform: translateY(-2%)scale(110%) rotate(13deg) ;
     filter: drop-shadow(10px 10px 70px rgb(123, 21, 255));

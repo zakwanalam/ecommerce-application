@@ -181,7 +181,7 @@ function ProductPage(props) {
 
   return (
     <>
-      <section className="relative pt-36 lg:pl-36 bg-indigo-950 px-1 text-left ">
+      <section className="relative pt-36 lg:pl-36 top-5 bg-indigo-950 px-1 text-left ">
         <div className="w-full mx-auto px-4 sm:px-6 lg:px-0">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 mx-auto max-md:px-2 ">
             <div className="img">

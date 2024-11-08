@@ -59,7 +59,7 @@ function RecentProducts(props) {
             {
               return (
                 <>
-                  <div ref={observerRef} style={{ zIndex: "0" }} id="recentProducts" className={`  pt-6  ${i % 2 === 0 ? "lg:mx-10" : null}
+                  <div ref={observerRef} style={{ zIndex: "0" }} id="recentProducts" className={` pt-6  ${i % 2 === 0 ? "lg:mx-20" : null}
  `}>
                     <Product
                       isProductSelected={props.isProductSelected}

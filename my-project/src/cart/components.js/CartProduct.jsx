@@ -2,17 +2,18 @@ import React, { useEffect } from "react";
 import { useState } from "react";
 
 function CartProduct(props) {
-  const [quantity, setQuantity] = useState(1);
+  const [quantity, setQuantity] = useState(props.product.quantity);
 
   const increment = () => {
+    
     setQuantity(quantity+1);
-    props.setProductQuantity(props.cart.indexOf(props.product),quantity+1)
+    props.setProductQuantity(props.product.cart_item_id,quantity+1)
   };
 
   const decrement = () => {
     if (quantity > 1) {
       setQuantity(quantity-1);
-      props.setProductQuantity(props.cart.indexOf(props.product),quantity-1)
+      props.setProductQuantity(props.product.cart_item_id,quantity-1)
     }
   };
   const obj = [{
@@ -41,7 +42,7 @@ function CartProduct(props) {
               >
                 -
               </button>
-              <span className="text-sm font-semibold">{props.product.quantity}</span>
+              <span className="text-sm font-semibold">{quantity}</span>
               <button
                 onClick={increment}
                 className="px-1.5 py-0.5 text-sm bg-gray-200 text-black rounded hover:bg-gray-300"
@@ -49,7 +50,8 @@ function CartProduct(props) {
                 +
               </button>
             </div>
-            <div on className="flex justify-center items-center cursor-pointer" onClick={()=>{const index = props.cart.indexOf(props.product); props.removeFromCart(index)}}>
+            <div on className="flex justify-center items-center cursor-pointer" onClick={()=>{const index = props.cart.indexOf(props.product); 
+              props.removeFromCart(props.product.cart_item_id,index)}}>
               {" "}
               <svg
                 enable-background="new 0 0 512 512"

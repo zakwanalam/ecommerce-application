@@ -83,7 +83,7 @@ app.post("/api/saveReview", (req, res) => {
       if (err) {
         throw err;
       }
-      console.log(review,'Review Sent');
+      console.log(review, 'Review Sent');
       res.send({ success: true });
     });
   } catch (error) {
@@ -278,7 +278,7 @@ app.get("/api/signup", (req, res) => {
         email: email,
         fullName: fullName,
         address: address,
-        profile_picture:'https://avatars.githubusercontent.com/u/124599?v=4',
+        profile_picture: 'https://avatars.githubusercontent.com/u/124599?v=4',
         password: hashedPassword,
         expiry: expiryDate,
         verifyCode: verifyCode,
@@ -458,78 +458,144 @@ app.get("/api/logout", (req, res) => {
   res.clearCookie("token").send({ success: true });
 });
 
+app.post('/api/adminLogout', (req, res) => {
+  res.clearCookie('adminToken').send({ success: true })
+});
+
 app.post("/api/addToCart", (req, res) => {
-  const cart = req.body;
+
+  const { productId, quantity } = req.body;
+
+  console.log('id', productId);
+  console.log('quantity', quantity);
+
   // const { token } = req.cookies;
   const { email } = jwt.decode(req.cookies.token);
   // const email = jwt.decode(token).email;
-  console.log(cart);
-  const query = "UPDATE usercart SET cart = ? where email = ?";
-
-  db.query(query, [JSON.stringify(cart), email], (err, results) => {
+  const query = `INSERT INTO cart (email,product_id,quantity)
+                    VALUES(?,?,?)`;
+  db.query(query, [email, productId, quantity], (err, results) => {
     if (err) {
-      throw err;
+      console.log('Duplicate Entry');
+      return res.status(401).send('Duplicate Entry')
     }
     if (results.affectedRows > 0) {
-      console.log("User Updated");
-      res.send({ cart });
+      console.log("Product Added To Cart");
+      res.send({success:true});
     } else {
-      //INSERT
-      const query = `INSERT INTO usercart (email,cart)
-                    VALUES(?,?)`;
-      db.query(query, [email, JSON.stringify(cart)], (err, results) => {
-        if (err) {
-          throw err;
-        }
-        if (results > 0) {
-          console.log("User Saved");
-          res.status(201).send();
-        } else {
-          res.send("Error While storing cart");
-        }
-      });
+      res.send("Error While storing cart");
     }
   });
+
 });
-app.post("/api/saveUser", (req, res) => {
-  
+
+app.post('/api/removeFromCart', (req, res) => {
+  const { cart_item_id } = req.body;
+  console.log(cart_item_id);
+
+  const query = `DELETE FROM cart WHERE cart_item_id = ${cart_item_id}`
+
   try {
-const userData = req.body;
-  const { email, firstName, lastName, address, profile_picture } = userData;
-  const fullName = `${firstName} ${lastName}`;
-  const query = `UPDATE users SET fullName = ?, address = ?, profile_picture = ? WHERE email = ?`;
-  console.log(fullName);
-  
-    //Update Database
-    db.query(query,[fullName, address, profile_picture, email],(err, results) => {
-        if (err) {
-          throw err;
-        } 
-        //Update Cookies
-        else {
-          const { token } = req.cookies;
-          const previousToken = jwt.decode(token);
-          const jwtToken = jwt.sign(
-            {
-              email: email,
-              fullName: fullName,
-              address: address,
-            },
-            "secret",
-            {
-              expiresIn: previousToken.exp,
-            }
-          );
-          const expiryDate = previousToken.exp * 1000;
-          const options = {
-            expires: new Date(expiryDate),
-            httpOnly: true,
-          };
-          res
-            .cookie("token", jwtToken, options)
-            .send({ success: true, msg: "User Updated SuccessFully" });
-        }
+    db.query(query, (err, results) => {
+      if (err) { throw err }
+      else {
+        res.send({ success: true, msg: 'Cart Item Deleted Successfully' })
       }
+    })
+  } catch (error) {
+    res.send({ success: true, msg: 'Cart Item Deletion Failed' })
+    console.log(error);
+  }
+
+})
+app.post('/api/updateCartItemQuantity', (req, res) => {
+  const { cart_item_id, quantity } = req.body;
+
+  const query = 'UPDATE cart SET quantity = ? WHERE cart_item_id = ?'
+
+  try {
+    db.query(query, [quantity, cart_item_id], (err, results) => {
+      if (err) { throw err }
+      else {
+        console.log('Cart Item Quantity Updated Successfully');
+        
+        res.send({ success: true })
+      }
+    });
+  } catch (error) {
+    console.log(error);
+    res.send({ success: false })
+  }
+})
+
+app.get('/api/getCart', (req, res) => {
+  const email = jwt.decode(req.cookies.token).email;
+  const query =
+    `SELECT c.cart_item_id,  p.*,c.quantity
+                FROM users as u 
+                JOIN cart as c
+                ON u.email = c.email
+                JOIN product p
+                ON p.id = c.product_id
+                where u.email = ?
+              `
+
+  try {
+    db.query(query, email, (err, results) => {
+      if (err) {
+        console.log(err);
+      }
+      const parsedResults = results.map(item => ({
+        ...item,
+        stock: JSON.parse(item.stock),
+      }));
+      res.send({ cart: parsedResults, success: true })
+    })
+  } catch (error) {
+    console.log(error);
+  }
+
+})
+
+app.post("/api/saveUser", (req, res) => {
+
+  try {
+    const userData = req.body;
+    const { email, firstName, lastName, address, profile_picture } = userData;
+    const fullName = `${firstName} ${lastName}`;
+    const query = `UPDATE users SET fullName = ?, address = ?, profile_picture = ? WHERE email = ?`;
+    console.log(fullName);
+
+    //Update Database
+    db.query(query, [fullName, address, profile_picture, email], (err, results) => {
+      if (err) {
+        throw err;
+      }
+      //Update Cookies
+      else {
+        const { token } = req.cookies;
+        const previousToken = jwt.decode(token);
+        const jwtToken = jwt.sign(
+          {
+            email: email,
+            fullName: fullName,
+            address: address,
+          },
+          "secret",
+          {
+            expiresIn: previousToken.exp,
+          }
+        );
+        const expiryDate = previousToken.exp * 1000;
+        const options = {
+          expires: new Date(expiryDate),
+          httpOnly: true,
+        };
+        res
+          .cookie("token", jwtToken, options)
+          .send({ success: true, msg: "User Updated SuccessFully" });
+      }
+    }
     );
   } catch (error) {
     console.log(error);
@@ -544,33 +610,33 @@ app.get("/api/getUser", (req, res) => {
     console.log(error);
   }
 });
-app.get("/api/getCart", (req, res) => {
-  const email = jwt.decode(req.cookies.token).email;
-  const query = "SELECT cart FROM usercart WHERE email = ?";
-  try {
-    db.query(query, email, (err, results) => {
-      if (err) {
-        res.send({ success: false, msg: "Cannot fetch from database" });
-      }
-  
-     try {
-       if (results.length > 0 && results[0].cart != undefined) {
-         res.send({
-           cart: JSON.parse(results[0].cart),
-           success: true,
-           msg: "Cart fetched successfully",
-         });
-       } else {
-         res.send({ success: false, msg: "Cart Not Found" });
-       }
-     } catch (error) {
-      console.log(error);
-     }
-    });
-  } catch (error) {
-    console.log(error);
-  }
-});
+// app.get("/api/getCart", (req, res) => {
+//   const email = jwt.decode(req.cookies.token).email;
+//   const query = "SELECT cart FROM usercart WHERE email = ?";
+//   try {
+//     db.query(query, email, (err, results) => {
+//       if (err) {
+//         res.send({ success: false, msg: "Cannot fetch from database" });
+//       }
+
+//      try {
+//        if (results.length > 0 && results[0].cart != undefined) {
+//          res.send({
+//            cart: JSON.parse(results[0].cart),
+//            success: true,
+//            msg: "Cart fetched successfully",
+//          });
+//        } else {
+//          res.send({ success: false, msg: "Cart Not Found" });
+//        }
+//      } catch (error) {
+//       console.log(error);
+//      }
+//     });
+//   } catch (error) {
+//     console.log(error);
+//   }
+// });
 
 app.get("/api/loadUserData", (req, res) => {
   try {
@@ -594,9 +660,11 @@ const port = process.env.PORT || 3000;
 app.listen(port, () => {
   console.log(`app is running on port${port}`);
 });
+
 const stripe = Stripe(
   "sk_test_51NDIgmQY69KQ4gJj7BpV9kB0DVHmcByTZxjH6W0CNWofMoQWPsrkvBYs3VtooB0C0pQfToxq2DeAtwxXU8pEJ1Nq00UhvDUfzz"
 );
+
 app.post("/api/checkout", async (req, res) => {
   try {
     const { products, tax, discount, shipping } = req.body;
@@ -653,7 +721,7 @@ app.post("/api/checkout", async (req, res) => {
       });
     }
 
-    
+
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ["card"],
       line_items: lineItems,

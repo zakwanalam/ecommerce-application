@@ -76,6 +76,32 @@ import OrderCard from "./OrderCard";
 import { Skeleton } from "@/components/ui/skeleton";
 import OrderTableSkeleton from "./OrderTableSkeleton";
 function Orders() {
+
+  const [weekAmount,setWeekAmount] = useState(0);
+  const [monthAmount,setMonthAmount] = useState(0);
+
+  useEffect(()=>{
+    const weekAmount  = ()=>{
+      setWeekAmount(0)
+      orders.map((element)=>{
+        if(isLessThanAWeek(element.created)){
+          setWeekAmount(prev=>prev+=parseFloat(element.amount_total))
+        }
+      })
+    }
+    const monthAmount = ()=>{
+      setMonthAmount(0)
+      orders.map((element)=>{
+        if(isDateLessThanAYear(element.created)){
+          setMonthAmount(prev=>prev+=parseFloat(element.amount_total))
+        }
+      })
+    }
+    weekAmount()
+    monthAmount()
+  })
+  
+
   const [orders, setOrders] = useState([]);
   const [cardCount, setCardCount] = useState(0);
   const [hideSkeleton, setHideSkeleton] = useState(false);
@@ -99,6 +125,7 @@ function Orders() {
     oneMonthAgo.setMonth(now.getMonth() - 1);
     return then > oneMonthAgo;
   };
+  
   const isDateLessThanAYear = (date) => {
     const then = new Date(date);
     const oneYearAgo = new Date(Date.now());
@@ -106,6 +133,7 @@ function Orders() {
 
     return then > oneYearAgo;
   };
+
   const isLessThanAWeek = (date) => {
     const then = new Date(date);
     const now = new Date();
@@ -114,6 +142,7 @@ function Orders() {
     const timeDifference = now.getTime() - then.getTime();
     return timeDifference <= oneWeekInMs;
   };
+
   const isLessThan3Days = (date) => {
     const then = new Date(date);
     const now = new Date();
@@ -121,27 +150,27 @@ function Orders() {
     const timeDifference = now.getTime() - then.getTime();
     return timeDifference <= oneWeekInMs;
   };
+
   return (
     <div className=" md:pl-14">
       <div className="grid flex-1 absolute items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8 lg:grid-cols-3 xl:grid-cols-3">
         <div className="grid auto-rows-max items-start gap-4 md:gap-8 lg:col-span-2">
           <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-2 xl:grid-cols-4">
-            <Card className="sm:col-span-2" x-chunk="dashboard-05-chunk-0">
+            <Card className="sm:col-span-2 bg-primary" x-chunk="dashboard-05-chunk-0">
               <CardHeader className="pb-3">
-                <CardTitle>Your Orders</CardTitle>
-                <CardDescription className="max-w-lg text-balance leading-relaxed">
-                  Introducing Our Dynamic Orders Dashboard for Seamless
-                  Management and Insightful Analysis.
+                <CardTitle className={'text-3xl text-white font-semibold pb-3'}>Your Orders</CardTitle>
+                <CardDescription className="max-w-lg text-white text-balance leading-relaxed">
+                Introducing Dynamic Orders Dashboard for Seamless
+                Management and Insightful Analysis.Integrating advanced data visualization and 
+                automation.
                 </CardDescription>
               </CardHeader>
-              <CardFooter>
-                <Button>Create New Order</Button>
-              </CardFooter>
+             
             </Card>
             <Card x-chunk="dashboard-05-chunk-1">
               <CardHeader className="pb-2">
                 <CardDescription>This Week</CardDescription>
-                <CardTitle className="text-4xl">$1,329</CardTitle>
+                <CardTitle className="text-4xl">${weekAmount}</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="text-xs text-muted-foreground">
@@ -155,7 +184,7 @@ function Orders() {
             <Card x-chunk="dashboard-05-chunk-2">
               <CardHeader className="pb-2">
                 <CardDescription>This Month</CardDescription>
-                <CardTitle className="text-4xl">$5,329</CardTitle>
+                <CardTitle className="text-4xl">${monthAmount}</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="text-xs text-muted-foreground">
@@ -311,7 +340,7 @@ function Orders() {
                                   order={session}
                                 />
                               </>
-                            );
+                            )                        ;
                           }
                         })
                       ) : (

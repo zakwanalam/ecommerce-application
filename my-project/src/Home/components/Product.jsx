@@ -134,7 +134,7 @@ function Product(props) {
             </div>
             <a
               onClick={() => {
-                props.addToCart(props.index);
+                props.addToCart(props.product.id,props.index);
                 toast({
                   title:`Item Added: ${query.name}`
                 })

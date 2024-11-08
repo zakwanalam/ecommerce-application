@@ -26,14 +26,14 @@ export function LoginForm(props) {
     if (response.data.success === true) {
       toast({
         variant: "success",
-        title: "Login was successful",
+        title: "Welcome To Admin Panel",
       });
       setTimeout(() => {
-        navigate("/");
+        navigate("/orders");
         window.location.reload();
       }, 1500);
       return;
-    } else if (response.data.isNotVerified) {
+    } else {
       toast({
         variant: "destructive",
         title: "Invalid Username Or Password",
@@ -41,23 +41,7 @@ export function LoginForm(props) {
     }
   };
 
-  const handleAdminLogin = async () => {
-    const adminData={email:formData.email,password:formData.password}
-    const response = await axios.post("/api/verifyAdmin",adminData);
-    if (response.data.success === true) {
-      toast({
-        variant: "success",
-        title: "Welcome to Admin Panel",
-      });
-      navigate('/admin/dashboard')
-    }
-    else{
-      toast({
-        variant: "destructive",
-        title: "Invalid Username Or Password",
-      });
-    }
-  };
+
 
   const handleOnCange = (e) => {
     const { name, value } = e.target;
@@ -109,7 +93,7 @@ export function LoginForm(props) {
                 required
               />
             </div>
-            <Link onClick={props.adminStatus===true?handleAdminLogin:handleSubmit}>
+            <Link onClick={handleSubmit}>
               <Button
                 type="submit"
                 className="w-full bg-indigo-500 hover:bg-indigo-700"

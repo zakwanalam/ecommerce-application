@@ -91,7 +91,7 @@ function Navbar(props) {
   const loadingNavigation = useLoadingNavigation(props.setProgress);
   return (
     <>
-      <nav className=" text-white  px-5 container  max-w-[1350px]  max-xs:max-w-md   max-xl:scale-[92%]    rounded-full translate-x-[-50%] left-[50%]  mt-8 bg-indigo-900 z-20 shadow-xl w-screen absolute border-gray-200 dark:bg-gray-900 dark:border-gray-700">
+      <nav className=" text-white  w-11/12 min-[1000px]:w-9/12 px-3  rounded-full translate-x-[-50%] left-[50%]  mt-8 bg-indigo-900 z-20 shadow-xl  absolute border-gray-200 dark:bg-gray-900 dark:border-gray-700">
         <div className="max-w-screen-xl flex  items-center justify-between mx-auto my-0 ">
           <a
             onClick={() => {

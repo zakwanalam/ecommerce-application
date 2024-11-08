@@ -6,6 +6,7 @@ import "./App.css";
 import {
   BrowserRouter,
   Link,
+  Navigate,
   Route,
   Router,
   RouterProvider,
@@ -229,6 +230,7 @@ function App() {
       
       {loginStatus?
       <Routes>
+        <Route path="/" element={<Navigate to="/orders"  />} />
         <Route path="/orders" element={<Orders />}></Route>
         <Route path="/customerReviews" element={<CustomerReviews />}></Route>
         <Route path="/product" element={<Prodcut productList={productList} />}>

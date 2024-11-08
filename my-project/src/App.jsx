@@ -169,6 +169,7 @@ function App() {
         }));
 
         setProductList(convertedProducts);
+
       } catch (error) {
         console.error(error);
       }
@@ -176,33 +177,38 @@ function App() {
     setAppMode("user");
     getProduct();
     checkSessionAndFetchCart();
+
   }, []); // Empty dependency array ensures this runs only once
-  
-  const addToCart = async (index , quantity=1) => {
-    const { image_secondary_1, image_secondary_2, ...productWithoutImage } =
-      productList[index];
+  useEffect(() => {
+    console.log('this is my cart', cart);
+  }, [cart])
+  useEffect(() => {
+    console.log('this is my plist', productList);
+  }, [cart])
 
-    setCart((prevCart) => {
-      const myCart = [...prevCart];
-      myCart.push({
-        ...productWithoutImage,
-        quantity: quantity,
+  const addToCart = async (productId, index, quantity = 1) => {
+
+    const response = await axios.post("/api/addToCart", { productId, quantity });    
+    if (response.data.success===true) {
+      const { image_secondary_1, image_secondary_2, ...productWithoutImage } =
+        productList.find((product) => product.id === productId)
+      console.log(index);
+
+      setCart((prevCart) => {
+        const myCart = [...prevCart];
+        myCart.push({
+          ...productWithoutImage,
+          quantity: quantity,
+        });
+        return myCart;
       });
-      // Save the updated cart to the database
-      saveCartToDatabase(myCart);
-      return myCart;
-    });
-    
+    }
+    // Await the async function if it returns a promise
   };
 
-  const saveCartToDatabase = async (cart) => {
-    //save to database
-    console.log("this cart", cart);
-    const response = await axios.post("/api/addToCart", cart, {
-      headers: { "Content-Type": "application/json" },
-    });
-    console.log("Success", response.data.cart);
-  };
+
+
+
   const [userData, setUserData] = useState([]);
 
   const loadUserData = async () => {
@@ -214,23 +220,21 @@ function App() {
     console.log("Cannot Fetch userData ");
   };
 
-  const removeFromCart = async (index) => {
+  const removeFromCart = async (cart_item_id, index) => {
     setCart((prevCart) => {
-      // Create a copy of the previous cart state
       let myCart = [...prevCart];
-      // Remove the item at the specified index
       myCart.splice(index, 1);
-
-      // Log the updated cart to check its state
       console.log("Updated cart:", myCart);
-
       // Save the updated cart to the database
-      saveCartToDatabase(myCart);
-
       // Return the updated cart to update the state
       return myCart;
     });
+    await removeCartItemFromDatabase(cart_item_id)
   };
+  const removeCartItemFromDatabase = async (cart_item_id) => {
+    const response = await axios.post('/api/removeFromCart', { cart_item_id })
+    console.log(response.data?.msg);
+  }
 
   const [showCart, setShowCart] = useState(false);
 
@@ -238,18 +242,12 @@ function App() {
     showCart === true ? setShowCart(false) : setShowCart(true);
   };
 
-  const setProductQuantity = (index, quantity) => {
-    setCart((prevCart) => {
-      let newCart = [...prevCart];
-      newCart[index] = { ...newCart[index], quantity };
-      console.log("Updated cart:", newCart);
-
-      saveCartToDatabase(newCart);
-
-      return newCart;
-    });
+  const setProductQuantity = async (cart_item_id, quantity) => {
+    const response = await axios.post('api/updateCartItemQuantity', { cart_item_id, quantity })
   };
-  const isHome = location.pathname === "/home" || location.pathname=== "/product" ;
+
+
+  const isHome = location.pathname === "/home" || location.pathname === "/product";
   const [animation, setAnimation] = useState("");
   const productSelected = true;
   useEffect(() => {
@@ -273,8 +271,8 @@ function App() {
   };
   const [progress, setProgress] = useState(0)
 
-  const [category,setCategory]  = useState('all')
-  const [sortType,setSortType] = useState('asc')
+  const [category, setCategory] = useState('all')
+  const [sortType, setSortType] = useState('asc')
   return (
     <React.Fragment>
       <LoadingBar
@@ -315,10 +313,10 @@ function App() {
               addToCart={addToCart}
               productList={productList}
               cart={cart}
-              category = {category}
-              setCategory = {setCategory}
-              sortType = {sortType}
-              setSortType = {setSortType}
+              category={category}
+              setCategory={setCategory}
+              sortType={sortType}
+              setSortType={setSortType}
               loginStatus={loginLabel}
               setShowCart={setCartVisibility}
               isProductSelected={isProductSelected}
@@ -330,8 +328,8 @@ function App() {
         <Route path="/login" element={<LoginForm title="Login" />}></Route>
         <Route path="/forgetPassword" element={<ForgetPassword />}></Route>
         <Route path="/cart" element={<Cart />}></Route>
-        <Route path="/editProfile" element={<EditProfile setProgress={setProgress}/>}></Route>
-        <Route path="/product"  element={<ProductPage addToCart={addToCart} setProgress = {setProgress}  loginStatus={loginLabel}  />} ></Route>}
+        <Route path="/editProfile" element={<EditProfile setProgress={setProgress} />}></Route>
+        <Route path="/product" element={<ProductPage addToCart={addToCart} setProgress={setProgress} loginStatus={loginLabel} />} ></Route>
       </Routes>
       <Routes>
         <Route path="/paymentSuccess" element={<SuccessFullPayment />}></Route>
