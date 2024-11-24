@@ -1,4 +1,4 @@
-import { ChevronLeft, PlusCircle, Upload } from "lucide-react";
+import { ChevronLeft, Cross, PlusCircle, Upload } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
 import { Button } from "@/components/ui/button";
@@ -34,6 +34,7 @@ import { json, Link, useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { useEffect, useState } from "react";
 import StockVariant from "./StockVariant";
+import { Cross2Icon } from "@radix-ui/react-icons";
 
 function ProductEdit() {
   const location = useLocation();
@@ -59,7 +60,7 @@ function ProductEdit() {
   const [imageHidden, setImageHidden] = useState(true);
   const [imageHidden2, setImageHidden2] = useState(true);
   const [imageHidden3, setImageHidden3] = useState(true);
-
+  const [stock,setStock] = useState(product.stock)
   const placeholder =
     "https://upload.wikimedia.org/wikipedia/commons/3/3f/Placeholder_view_vector.svg";
   useEffect(() => console.log(product), [product]);
@@ -161,7 +162,7 @@ function ProductEdit() {
   return (
     <div className="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
       <div className="mx-auto grid max-w-[59rem] relative flex-1 justify-center items-center auto-rows-max gap-4">
-        <StockVariant toggleStockVariant={toggleStockVariant} setToggle={setToggle}/>
+        <StockVariant stock={stock} toggleStockVariant={toggleStockVariant} setToggle={setToggle}/>
         <div className="flex items-center gap-4">
           <div
             onClick={() => {
@@ -253,10 +254,9 @@ function ProductEdit() {
                         Size
                       </TableHead>
                     </TableRow>
-
                   </TableHeader>
                   <TableBody>
-                    {product.stock.map(
+                    {stock.map(
                       (stockItem, i) => {
                         return (
                           <TableRow>
@@ -284,6 +284,17 @@ function ProductEdit() {
                             </TableCell>
                             <TableCell>
                               <Label>{stockItem.size}</Label>
+                            </TableCell>
+                            <TableCell>
+                              <Cross2Icon onClick={
+                                ()=>{
+                                  setStock((prev)=>{
+                                    return prev.filter((_,index)=>index!=i)
+                                  }
+                                  )
+                                }
+
+                              } className="scale-150 cursor-pointer text-slate-500"/>
                             </TableCell>
                           </TableRow>
                         )
