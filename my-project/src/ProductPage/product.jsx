@@ -53,8 +53,15 @@ function ProductPage(props) {
   }
   const location = useLocation();
 
-  const { id, name, price, image, description, secondaryImage1, secondaryImage2, index } = location.state || {};
+  const { id, name, price , image,
+    description, secondaryImage1, 
+    secondaryImage2, stock, index } = 
+    location.state || {};
 
+  const [itemPrice,setItemPrice] = useState(price)
+  console.log('This is stock', stock);
+  const [stock_item_id, setStockItemID] = useState(stock[0].stock_item_id)
+  const [sizeButton, sizeButtonClicked] = useState(stock[0].size)
   const [animate, setAnimate] = useState(false)
   let [imageArray, setImageArray] = useState([image, secondaryImage1, secondaryImage2].filter(Boolean))
   let [imageCount, setImageCount] = useState(0)
@@ -122,13 +129,12 @@ function ProductPage(props) {
     }
   }
 
-  const {toast} = useToast()
+  const { toast } = useToast()
   const addToCart = () => {
-    props.addToCart(index, quantity)
+    props.addToCart(id, index, stock_item_id,itemPrice,quantity,sizeButton)
     toast({
-      title:`Item Added: ${name} `
+      title: `Item Added: ${name} `
     })
-
   }
   const [filteredReviews, setfilteredReviews] = useState([]);
   useEffect(() => {
@@ -228,7 +234,7 @@ function ProductPage(props) {
                 </h2>
                 <div className="flex flex-col sm:flex-row sm:items-center mb-6">
                   <h6 className="font-manrope font-semibold text-2xl leading-9 text-white  pr-5 sm:border-r border-gray-200 mr-5">
-                    ${price}
+                    ${itemPrice}
                   </h6>
                   <div className="flex items-center gap-2">
                     <div className="flex items-center gap-1">
@@ -418,20 +424,25 @@ function ProductPage(props) {
                     </span>
                   </li>
                 </ul>
-                <p className="text-gray-900 text-lg leading-8 font-medium mb-4">
+                <p className="text-white text-lg leading-8 font-medium mb-4">
                   Size
                 </p>
                 <div className="w-full pb-8 border-b border-gray-100 flex-wrap">
                   <div className=":bg-orange-500  grid grid-cols-3 min-[400px]:grid-cols-5 gap-3 max-w-md">
-                    <button className="bg-orange-500 text-center py-1.5 px-6 w-full font-semibold text-lg leading-8 text-white   flex items-center rounded-full justify-center transition-all duration-300 hover:bg-primary hover:shadow-sm hover:shadow-gray-100 hover:border-gray-300 visited:border-gray-300 visited:bg-gray-50">
-                      41
-                    </button>
-                    <button className="bg-orange-500 text-center py-1.5 px-6 w-full font-semibold text-lg leading-8 text-white  flex items-center rounded-full justify-center transition-all duration-300 hover:bg-primary hover:shadow-sm hover:shadow-gray-100 hover:border-gray-300 visited:border-gray-300 visited:bg-gray-50">
-                      42
-                    </button>
-                    <button className="bg-orange-500 text-center py-1.5 px-6 w-full font-semibold text-lg leading-8 text-white  flex items-center rounded-full justify-center transition-all duration-300 hover:bg-primary hover:shadow-sm hover:shadow-gray-100 hover:border-gray-300 visited:border-gray-300 visited:bg-gray-50">
-                      43
-                    </button>
+                    {stock.length ?
+                      stock.map((variant) => {
+                        return (
+                          <button onClick={() => {
+                            setStockItemID(variant.stock_item_id)
+                            sizeButtonClicked(variant.size)
+                            setItemPrice(variant.price)
+                          }
+                          } className={`${sizeButton === variant.size ? 'bg-primary' : 'bg-orange-500'}  text-center py-1.5 px-6 w-full font-semibold text-lg leading-8 text-white   flex items-center rounded-full justify-center transition-all duration-300 hover:bg-primary hover:shadow-sm hover:shadow-gray-100 hover:border-gray-300 visited:border-gray-300 visited:bg-gray-50`}>
+                            {variant.size}
+                          </button>
+                        )
+                      }) : ''}
+
                   </div>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 py-8">
@@ -527,7 +538,7 @@ function ProductPage(props) {
 
                     Add to cart
                   </button>
-                  <Toaster/>
+                  <Toaster />
 
 
                 </div>
@@ -693,7 +704,6 @@ function ProductPage(props) {
             {filteredReviews.length > 0 &&
               <div className="w-full ">
                 <h1 className="text-2xl text-white  font-semibold pb-10 ">Product Reviews</h1>
-
                 {filteredReviews.map((review, key) => {
                   return <Review review={review} />;
                 })}
@@ -750,7 +760,7 @@ function ProductPage(props) {
             </div>
           </div>
         </fieldset>
-        
+
       </section>
     </>
   );

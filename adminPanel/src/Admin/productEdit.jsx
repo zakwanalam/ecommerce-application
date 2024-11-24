@@ -33,11 +33,11 @@ import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { json, Link, useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { useEffect, useState } from "react";
+import StockVariant from "./StockVariant";
 
 function ProductEdit() {
   const location = useLocation();
   console.log(location.state);
-
   const [product, setProduct] = useState(() => {
     return (
       location.state || {
@@ -45,11 +45,7 @@ function ProductEdit() {
         image_main:
           "https://upload.wikimedia.org/wikipedia/commons/3/3f/Placeholder_view_vector.svg",
         description: "",
-        stock: {
-          small: { quantity: 0, price: 0 },
-          medium: { quantity: 0, price: 0 },
-          large: { quantity: 0, price: 0 },
-        },
+        stock: [],
         image_secondary_1: "",
         image_secondary_2: "",
         status: "",
@@ -71,27 +67,26 @@ function ProductEdit() {
   const handleChange = (e) => {
     const { name, value } = e.target != null ? e.target : e;
     console.log(name);
-    const [nestedKey, subKey, subSubKey, subSubSubKey] = name.split(".");
-    console.log(subKey, subSubKey, subSubSubKey);
+    setProduct((prev) => ({
+      ...prev,
+      [name]: value
+    }))
+  }
 
-    if (subSubSubKey != undefined) {
-      setProduct({
-        ...product,
-        stock: {
-          ...product.stock,
-          [subSubKey]: {
-            ...product.stock[subSubKey],
-            [subSubSubKey]: value,
-          },
+  const handleStockChange = (e, index) => {
+    const { name, value } = e.target != null ? e.target : e;
+    setProduct({
+      ...product,
+      stock: [
+        ...product.stock.slice(0, index),
+        {
+          ...product.stock[index],
+          [name]: parseInt(value)
         },
-      });
-    } else {
-      setProduct({
-        ...product,
-        [name]: value,
-      });
-    }
-  };
+        ...product.stock.slice(index + 1),
+      ]
+    })
+  }
 
   const handleSelectChange = (name, value) => {
     setProduct({
@@ -99,7 +94,7 @@ function ProductEdit() {
       [name]: value,
     });
   };
-  
+
   const [key, setKey] = useState("");
 
   const handleFile = async (event) => {
@@ -145,6 +140,8 @@ function ProductEdit() {
 
   useEffect(() => {
     console.log(product.image_main);
+    console.log(product);
+
     console.log("Secondary Images", product.images_secondary);
   }, [product]);
 
@@ -159,10 +156,12 @@ function ProductEdit() {
   };
   console.log(product.subCategory);
   const nav = useNavigate();
+  const [toggleStockVariant,setToggle] = useState(false)
 
   return (
     <div className="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
-      <div className="mx-auto grid max-w-[59rem] flex-1 auto-rows-max gap-4">
+      <div className="mx-auto grid max-w-[59rem] relative flex-1 justify-center items-center auto-rows-max gap-4">
+        <StockVariant toggleStockVariant={toggleStockVariant} setToggle={setToggle}/>
         <div className="flex items-center gap-4">
           <div
             onClick={() => {
@@ -216,7 +215,7 @@ function ProductEdit() {
                       className="w-full"
                       name="name"
                       defaultValue={product.name}
-                      onChange={handleChange}
+                      onChange={(e) => { handleChange(e) }}
                     />
                   </div>
                   <div className="grid gap-3">
@@ -225,7 +224,7 @@ function ProductEdit() {
                       id="description"
                       name="description"
                       defaultValue={product.description}
-                      onChange={handleChange}
+                      onChange={(e) => { handleChange(e) }}
                       className="min-h-32"
                     />
                   </div>
@@ -241,6 +240,8 @@ function ProductEdit() {
               </CardHeader>
               <CardContent>
                 <Table>
+
+
                   <TableHeader>
                     <TableRow>
                       <TableHead className="text-center w-[100px]">
@@ -252,100 +253,50 @@ function ProductEdit() {
                         Size
                       </TableHead>
                     </TableRow>
+
                   </TableHeader>
                   <TableBody>
-                    <TableRow>
-                      <TableCell className="font-semibold">GGPC-001</TableCell>
-                      <TableCell>
-                        <Label htmlFor="stock-1" className="sr-only">
-                          Stock
-                        </Label>
-                        <Input
-                          id="small"
-                          type="number"
-                          name="product.stock.small.quantity"
-                          defaultValue={product.stock.small.quantity}
-                          onChange={handleChange}
-                        />
-                      </TableCell>
-                      <TableCell>
-                        <Input
-                          id="smallPrice"
-                          type="number"
-                          name="product.stock.small.price"
-                          defaultValue={product.stock.small.price}
-                          onChange={handleChange}
-                        />
-                      </TableCell>
-                      <TableCell>
-                        <Label>Small</Label>
-                      </TableCell>
-                    </TableRow>
-                    <TableRow>
-                      <TableCell className="font-semibold">GGPC-002</TableCell>
-                      <TableCell>
-                        <Label htmlFor="stock-2" className="sr-only">
-                          Stock
-                        </Label>
-                        <Input
-                          id="medium"
-                          type="number"
-                          name="product.stock.medium.quantity"
-                          defaultValue={product.stock.medium.quantity}
-                          onChange={handleChange}
-                        />
-                      </TableCell>
-                      <TableCell>
-                        <Label htmlFor="price-2" className="sr-only">
-                          Price
-                        </Label>
-                        <Input
-                          id="mediumPrice"
-                          type="number"
-                          name="product.stock.medium.price"
-                          defaultValue={product.stock.medium.price}
-                          onChange={handleChange}
-                        />
-                      </TableCell>
-                      <TableCell>
-                        <Label className={"text-left"}>Medium</Label>
-                      </TableCell>
-                    </TableRow>
-                    <TableRow>
-                      <TableCell className="font-semibold">GGPC-003</TableCell>
-                      <TableCell>
-                        <Label htmlFor="stock-3" className="sr-only">
-                          Stock
-                        </Label>
-                        <Input
-                          id="large"
-                          type="number"
-                          name="product.stock.large.quantity"
-                          defaultValue={product.stock.large.quantity}
-                          onChange={handleChange}
-                        />
-                      </TableCell>
-                      <TableCell>
-                        <Label htmlFor="mediumPrice" className="sr-only">
-                          Stock
-                        </Label>
-                        <Input
-                          id="largePrice"
-                          type="number"
-                          name="product.stock.large.price"
-                          defaultValue={product.stock.large.price}
-                          onChange={handleChange}
-                        />
-                      </TableCell>
-                      <TableCell>
-                        <Label>Large</Label>
-                      </TableCell>
-                    </TableRow>
+                    {product.stock.map(
+                      (stockItem, i) => {
+                        return (
+                          <TableRow>
+                            <TableCell className="font-semibold">GGPC {stockItem.stock_item_id}</TableCell>
+                            <TableCell>
+                              <Label htmlFor="stock-1" className="sr-only">
+                                Stock
+                              </Label>
+                              <Input
+                                id="small"
+                                type="number"
+                                name="quantity"
+                                defaultValue={stockItem.quantity}
+                                onChange={(e) => { handleStockChange(e, i) }}
+                              />
+                            </TableCell>
+                            <TableCell>
+                              <Input
+                                id="smallPrice"
+                                type="number"
+                                name="price"
+                                defaultValue={stockItem.price}
+                                onChange={(e) => { handleStockChange(e, i) }}
+                              />
+                            </TableCell>
+                            <TableCell>
+                              <Label>{stockItem.size}</Label>
+                            </TableCell>
+                          </TableRow>
+                        )
+                      }
+                    )
+                    }
+
                   </TableBody>
                 </Table>
               </CardContent>
               <CardFooter className="justify-center border-t p-4">
-                <Button size="sm" variant="ghost" className="gap-1">
+                <Button onClick={() => setToggle(true)
+                } size="sm" variant="ghost" className="gap-1">
                   <PlusCircle className="h-3.5 w-3.5" />
                   Add Variant
                 </Button>
@@ -465,9 +416,8 @@ function ProductEdit() {
                     </div>
                     <div
                       hidden={!imageHidden}
-                      className={` absolute cursor-pointer aspect-auto w-full h-full  rounded-md  bg-slate-200   ${
-                        imageHidden === true ? "animate-pulse" : ""
-                      } `}
+                      className={` absolute cursor-pointer aspect-auto w-full h-full  rounded-md  bg-slate-200   ${imageHidden === true ? "animate-pulse" : ""
+                        } `}
                     ></div>
                     <input
                       id="input"
@@ -511,9 +461,8 @@ function ProductEdit() {
                       </div>
                       <div
                         hidden={!imageHidden2}
-                        className={`absolute cursor-pointer aspect-auto w-full h-full rounded-md bg-slate-200  ${
-                          imageHidden2 === true ? "animate-pulse" : ""
-                        }`}
+                        className={`absolute cursor-pointer aspect-auto w-full h-full rounded-md bg-slate-200  ${imageHidden2 === true ? "animate-pulse" : ""
+                          }`}
                       ></div>
                     </div>
                     <div className="relative flex w-18 aspect-square">
@@ -546,9 +495,8 @@ function ProductEdit() {
                       </div>
                       <div
                         hidden={!imageHidden3}
-                        className={`absolute cursor-pointer aspect-auto w-full h-full rounded-md bg-slate-200  ${
-                          imageHidden3 === true ? "animate-pulse" : ""
-                        }`}
+                        className={`absolute cursor-pointer aspect-auto w-full h-full rounded-md bg-slate-200  ${imageHidden3 === true ? "animate-pulse" : ""
+                          }`}
                       ></div>
                     </div>
                     <button

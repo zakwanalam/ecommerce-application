@@ -2,18 +2,19 @@ import React, { useEffect } from "react";
 import { useState } from "react";
 
 function CartProduct(props) {
-  const [quantity, setQuantity] = useState(props.product.quantity);
-
+  
+  const [quantity, setQuantity] = useState(props.product.quantity||0);
+  console.log('product',props.product);
+  
   const increment = () => {
-    
     setQuantity(quantity+1);
-    props.setProductQuantity(props.product.cart_item_id,quantity+1)
+    props.setProductQuantity(props.product.cart_item_id,quantity+1,props.index)
   };
 
   const decrement = () => {
     if (quantity > 1) {
       setQuantity(quantity-1);
-      props.setProductQuantity(props.product.cart_item_id,quantity-1)
+      props.setProductQuantity(props.product.cart_item_id,quantity-1,props.index)
     }
   };
   const obj = [{
@@ -34,7 +35,9 @@ function CartProduct(props) {
         <div className="w-full h-full flex  ml-3 mr-3 pt-0 pb-0.5 flex-col justify-between">
           <h3 className="text-left text-sm font-semibold text-indigo-500">{props.product.name}</h3>
           <div className="text-sm flex justify-between items-center ">
-            <h4 className="text-sm font-semibold">${props.product.stock.small.price}</h4>
+            <h4 className="text-sm font-semibold">${props.product.price}</h4>
+            <h4 className="text-xs bg-slate-100 p-1 rounded font-normal">Size: {props.product.size}</h4>
+
             <div className="flex items-center space-x-2">
               <button
                 onClick={decrement}
@@ -51,7 +54,7 @@ function CartProduct(props) {
               </button>
             </div>
             <div on className="flex justify-center items-center cursor-pointer" onClick={()=>{const index = props.cart.indexOf(props.product); 
-              props.removeFromCart(props.product.cart_item_id,index)}}>
+              props.removeFromCart(props.product.cart_item_id,index,props.product.id,props.product.stock_item_id)}}>
               {" "}
               <svg
                 enable-background="new 0 0 512 512"

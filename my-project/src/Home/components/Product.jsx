@@ -9,15 +9,18 @@ import { Toaster } from "@/components/ui/toaster";
 import { toast } from "@/components/ui/use-toast";
 
 function Product(props) {
+  const product = props.product;
+  const productStock = product.stock;
   const query = {
     index:props.index,
-    id: props.product.id,
-    name: props.product.name,
-    price: props.product.stock.small.price,
-    image: props.product.image_main,
-    secondaryImage1:props.product.image_secondary_1,
-    secondaryImage2:props.product.image_secondary_2,
-    description: props.product.description,
+    id: product.id,
+    name: product.name,
+    price: product.stock[0].price,
+    stock:product.stock,
+    image: product.image_main,
+    secondaryImage1:product.image_secondary_1,
+    secondaryImage2:product.image_secondary_2,
+    description: product.description,
   };
 
   const [imageLoaded, setImageLoaded] = useState(false);
@@ -25,7 +28,6 @@ function Product(props) {
   useEffect(() => {
     console.log(imageLoaded);
   }, [imageLoaded]);
-
 
   const loadingNavigation = useLoadingNavigation(props.setProgress)
   return (
@@ -73,7 +75,7 @@ function Product(props) {
             <div className="mt-2 mb-5 flex items-center justify-between">
               <p>
                 <span className="text-3xl  font-bold text-slate-800 max-sm:text-[21px]">
-                  ${props.product.stock.small.price}
+                  ${query.price}
                 </span>
                 <span className="text-sm text-slate-white line-through">
                   ${props.product.original}
@@ -134,7 +136,8 @@ function Product(props) {
             </div>
             <a
               onClick={() => {
-                props.addToCart(props.product.id,props.index);
+                props.addToCart(props.product.id,props.index,
+                  props.product.stock[0].stock_item_id, props.product.stock[0].price,1,props.product.stock[0].size);
                 toast({
                   title:`Item Added: ${query.name}`
                 })

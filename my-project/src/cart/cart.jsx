@@ -17,25 +17,27 @@ export default function Cart(props) {
   const [tax, setTax] = useState(0);
   const [discount, setDiscount] = useState(0);
   const [total, setTotal] = useState(0);
-  const [disable,setDisable] = useState((props.cart.length > 0 )?false:true)
+  const [disable, setDisable] = useState((props.cart.length > 0) ? false : true)
 
 
   useEffect(() => {
+
     let x = 0;
     props.cart.forEach((product) => {
-      x += Math.round(product.stock.small.price * product.quantity);
+      x += (product.price * product.quantity);
     });
-    setSubTotal(x);
+    setSubTotal(Math.round(x));
     setTax((subtotal * 13) / 100);
     setDiscount(0);
     setShipping(10);
-    setTotal("$" + [subtotal + shipping + tax + discount].toString());
+    const total = parseFloat([subtotal + shipping + tax + discount]).toFixed(2)
+    setTotal("$" + total.toString());
 
-    setDisable(props.cart.length===0 || clicked)
-    
+    setDisable(props.cart.length === 0 || clicked)
+
   });
 
-  
+
   const increment = () => {
     setQuantity((prevQuantity) => prevQuantity + 1);
   };
@@ -46,32 +48,34 @@ export default function Cart(props) {
     }
   };
 
-  
 
-  const [clicked,setClicked] = useState(false)
 
-    const handleCheckout = async () => {
-      setClicked((prev)=>true)
-      setDisable((prev)=>true)
+  const [clicked, setClicked] = useState(false)
+
+  const handleCheckout = async () => {
+    setClicked((prev) => true)
+    setDisable((prev) => true)
     const stripe = await loadStripe('pk_test_51NDIgmQY69KQ4gJjN1tgyaVi6r5hi6L8l1BlEWQhdEoM8DR5NPC46Ql8ae3WkTwzpSXpBMX5qvpQzCK1g1LxaHmo00nuCOYQpr'); // Use your publishable key here
     try {
-      const response = await axios.post('/api/checkout', { products: props.cart, tax: tax,
+      const response = await axios.post('/api/checkout', {
+        products: props.cart, tax: tax,
         discount: discount,
-        shipping: shipping, });
-      
+        shipping: shipping,
+      });
+
       console.log('checout ongoing');
-      
+
       const result = await stripe.redirectToCheckout({
         sessionId: response.data.id,
       });
-      
+
       if (result.error) {
         console.error(result.error.message);
       }
     } catch (error) {
       console.error('Error during checkout:', error);
     }
-    }
+  }
   return (
     <div
       className={`w-96 flex backdrop-blur-lg h-screen z-30 bg-white fixed top-0 max-sm:h-screen ${props.animation}`}
@@ -116,7 +120,7 @@ export default function Cart(props) {
               </g>
             </svg>
             <h2 className="ml-4 align-middle ">Your Cart</h2>
-            <div onClick={()=>{props.setShowCart(false)}} className={`w-6 h-6 flex items-center absolute right-5 cursor-pointer`}>
+            <div onClick={() => { props.setShowCart(false) }} className={`w-6 h-6 flex items-center absolute right-5 cursor-pointer`}>
               <svg
                 id="Outlined"
                 viewBox="0 0 32 32"
@@ -133,11 +137,10 @@ export default function Cart(props) {
         <ScrollArea className="w-full h-[34rem] rounded-md">
           <div>
             <ul
-              className={`px-4 py-4 pt-6 ${
-                props.cart[0] === undefined
+              className={`px-4 py-4 pt-6 ${props.cart[0] === undefined
                   ? "h-[34rem] flex items-center justify-center"
                   : ""
-              }`}
+                }`}
             >
               {props.cart[0] === undefined ? (
                 <div className="text-2xl font-bold text-black/60">
@@ -149,6 +152,7 @@ export default function Cart(props) {
                   <>
                     <CartProduct
                       setProductQuantity={props.setProductQuantity}
+                      index={i}
                       cart={props.cart}
                       removeFromCart={props.removeFromCart}
                       product={product}
@@ -184,8 +188,8 @@ export default function Cart(props) {
             </li>
             <li className="flex justify-end  py-4">
               <Button disabled={disable} onClick={handleCheckout} className={`bg-indigo-600  hover:bg-indigo-700`}>
-                  Proceed to Checkout
-                {disable && clicked?<ReloadIcon className="ml-2 animate-spin"/>:null}
+                Proceed to Checkout
+                {disable && clicked ? <ReloadIcon className="ml-2 animate-spin" /> : null}
               </Button>
             </li>
           </ul>

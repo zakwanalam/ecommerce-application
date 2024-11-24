@@ -1,7 +1,4 @@
-import databaseConnect from "./dbConnect.js";
 import { sendVerificationEmail } from "./sendVerificationEmail.js";
-import mongoose from "mongoose";
-import UserModel from "./model/UserModel.js";
 import { default as bcrypt } from "bcryptjs";
 import e from "express";
 import * as mysql from "mysql";
@@ -23,6 +20,7 @@ import {
 } from "firebase/storage";
 import { loadStripe } from "@stripe/stripe-js";
 import Stripe from "stripe";
+import getUser from "./apiHandlers/getUser.js";
 const app = e();
 
 const firebaseConfig = {
@@ -77,7 +75,8 @@ app.post("/api/uploadImage", (req, res) => {
 app.post("/api/saveReview", (req, res) => {
   const feedback = req.body;
   const { date, product_id, email, rating, review } = feedback;
-  const query = `INSERT INTO reviews (product_id,email,rating,review_text,date) VALUES('${product_id}','${email}','${rating}','${review}','${date}')`;
+  const query = `INSERT INTO reviews (product_id,email,rating,review_text,date) 
+  VALUES('${product_id}','${email}','${rating}','${review}','${date}')`;
   try {
     db.query(query, (err, results) => {
       if (err) {
@@ -443,7 +442,7 @@ app.use("/api/verifySession", (req, res, next) => {
 app.get("/api/getProfilePic", (req, res) => {
   const { email } = jwt.decode(req.cookies.token);
   console.log(email);
-  const query = `SELECT profile_picture from users where email = '${email}'`;
+  const query = `SELECT profile_picture  from users where email = '${email}'`;
   db.query(query, (err, results) => {
     if (err) {
       throw err;
@@ -464,7 +463,7 @@ app.post('/api/adminLogout', (req, res) => {
 
 app.post("/api/addToCart", (req, res) => {
 
-  const { productId, quantity } = req.body;
+  const { productId, quantity, stock_item_id } = req.body;
 
   console.log('id', productId);
   console.log('quantity', quantity);
@@ -472,16 +471,16 @@ app.post("/api/addToCart", (req, res) => {
   // const { token } = req.cookies;
   const { email } = jwt.decode(req.cookies.token);
   // const email = jwt.decode(token).email;
-  const query = `INSERT INTO cart (email,product_id,quantity)
-                    VALUES(?,?,?)`;
-  db.query(query, [email, productId, quantity], (err, results) => {
+  const query = `INSERT INTO cart (email,product_id,quantity,stock_item_id)
+                    VALUES(?,?,?,?)`;
+  db.query(query, [email, productId, quantity, stock_item_id], (err, results) => {
     if (err) {
-      console.log('Duplicate Entry');
+      console.log(err.code);
       return res.status(401).send('Duplicate Entry')
     }
     if (results.affectedRows > 0) {
       console.log("Product Added To Cart");
-      res.send({success:true});
+      res.send({ success: true });
     } else {
       res.send("Error While storing cart");
     }
@@ -489,22 +488,42 @@ app.post("/api/addToCart", (req, res) => {
 
 });
 
-app.post('/api/removeFromCart', (req, res) => {
-  const { cart_item_id } = req.body;
+app.post('/api/removeFromCart', async (req, res) => {
+  const { cart_item_id, product_id, stock_item_id } = req.body;
   console.log(cart_item_id);
 
-  const query = `DELETE FROM cart WHERE cart_item_id = ${cart_item_id}`
+  const deleteFromCartId = `DELETE FROM cart WHERE cart_item_id = ${cart_item_id}`
+  const deleteFromPrimary = 'DELETE FROM cart where email=? and product_id=? and stock_item_id = ?'
+  const { token } = req.cookies;
+  const user = jwt.decode(token);
+  const email = user.email
 
   try {
-    db.query(query, (err, results) => {
-      if (err) { throw err }
-      else {
-        res.send({ success: true, msg: 'Cart Item Deleted Successfully' })
-      }
-    })
+    if (cart_item_id) {
+      db.query(deleteFromCartId, (err, results) => {
+        if (err) {
+          console.log("Cart Id Not Found", err.code);
+          return res.status(500).json({ success: false, msg: 'Failed to delete by cart_item_id' });
+        }
+        else if(results.length>0) {
+          
+          return res.status(200).json({ success: true, msg: 'Cart item deleted successfully' });
+        }
+      })
+    }
+    else {
+      db.query(deleteFromPrimary, [email, product_id, stock_item_id], (err,results) => {
+        if (err) {
+          console.log("Cart Id Not Found", err.code);
+          return res.status(500).json({ success: false, msg: 'Failed to delete item' });
+        }
+        else {
+          return res.status(200).json({ success: true, msg: 'Cart item deleted successfully' });
+        }
+      })
+    }
   } catch (error) {
-    res.send({ success: true, msg: 'Cart Item Deletion Failed' })
-    console.log(error);
+    return res.status(500).json({ success: false, msg: 'An unexpected error occurred' });
   }
 
 })
@@ -518,7 +537,7 @@ app.post('/api/updateCartItemQuantity', (req, res) => {
       if (err) { throw err }
       else {
         console.log('Cart Item Quantity Updated Successfully');
-        
+
         res.send({ success: true })
       }
     });
@@ -531,25 +550,23 @@ app.post('/api/updateCartItemQuantity', (req, res) => {
 app.get('/api/getCart', (req, res) => {
   const email = jwt.decode(req.cookies.token).email;
   const query =
-    `SELECT c.cart_item_id,  p.*,c.quantity
+    `SELECT c.cart_item_id,  p.*,s.stock_item_id,s.price,s.size,c.quantity
                 FROM users as u 
                 JOIN cart as c
                 ON u.email = c.email
                 JOIN product p
                 ON p.id = c.product_id
+                JOIN stock s
+                ON s.stock_item_id = c.stock_item_id
                 where u.email = ?
               `
-
   try {
     db.query(query, email, (err, results) => {
       if (err) {
         console.log(err);
       }
-      const parsedResults = results.map(item => ({
-        ...item,
-        stock: JSON.parse(item.stock),
-      }));
-      res.send({ cart: parsedResults, success: true })
+
+      res.send({ cart: results, success: true })
     })
   } catch (error) {
     console.log(error);
@@ -601,15 +618,9 @@ app.post("/api/saveUser", (req, res) => {
     console.log(error);
   }
 });
-app.get("/api/getUser", (req, res) => {
-  try {
-    const { token } = req.cookies;
-    const user = jwt.decode(token);
-    res.send({ user: user });
-  } catch (error) {
-    console.log(error);
-  }
-});
+app.get("/api/getUser", getUser)
+
+
 // app.get("/api/getCart", (req, res) => {
 //   const email = jwt.decode(req.cookies.token).email;
 //   const query = "SELECT cart FROM usercart WHERE email = ?";

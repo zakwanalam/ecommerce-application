@@ -69,7 +69,8 @@ function SearchBar({ productList, setProgress,searchIconClicked=false ,animate})
             const query = {
               id: product.id,
               name: product.name,
-              price: product.stock.small.price,
+              price: product.stock[0].price,
+              stock:product.stock,
               image: product.image_main,
               secondaryImage1:product.image_secondary_1,
               secondaryImage2:product.image_secondary_2,

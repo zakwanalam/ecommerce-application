@@ -164,10 +164,10 @@ function App() {
         const response = await axios.get("/api/getProducts");
         // Convert stock property before setting state
         const convertedProducts = response.data.product.map((product) => ({
-          ...product,
-          stock: JSON.parse(product.stock),
+          ...product
         }));
-
+        console.log('These a re my products',convertedProducts);
+        
         setProductList(convertedProducts);
 
       } catch (error) {
@@ -186,9 +186,10 @@ function App() {
     console.log('this is my plist', productList);
   }, [cart])
 
-  const addToCart = async (productId, index, quantity = 1) => {
-
-    const response = await axios.post("/api/addToCart", { productId, quantity });    
+  const addToCart = async (productId, index,stock_item_id,price, quantity = 1,size) => {
+    console.log('Product price',price);
+    
+    const response = await axios.post("/api/addToCart", { productId, quantity,stock_item_id});    
     if (response.data.success===true) {
       const { image_secondary_1, image_secondary_2, ...productWithoutImage } =
         productList.find((product) => product.id === productId)
@@ -198,16 +199,15 @@ function App() {
         const myCart = [...prevCart];
         myCart.push({
           ...productWithoutImage,
+          stock_item_id:stock_item_id,
+          size:size,
+          price:price,
           quantity: quantity,
         });
         return myCart;
       });
     }
-    // Await the async function if it returns a promise
   };
-
-
-
 
   const [userData, setUserData] = useState([]);
 
@@ -220,19 +220,19 @@ function App() {
     console.log("Cannot Fetch userData ");
   };
 
-  const removeFromCart = async (cart_item_id, index) => {
+  const removeFromCart = async (cart_item_id, index,product_id,stock_item_id) => {
     setCart((prevCart) => {
       let myCart = [...prevCart];
       myCart.splice(index, 1);
       console.log("Updated cart:", myCart);
-      // Save the updated cart to the database
-      // Return the updated cart to update the state
+
       return myCart;
     });
-    await removeCartItemFromDatabase(cart_item_id)
+    await removeCartItemFromDatabase(cart_item_id,product_id,stock_item_id)
   };
-  const removeCartItemFromDatabase = async (cart_item_id) => {
-    const response = await axios.post('/api/removeFromCart', { cart_item_id })
+  const removeCartItemFromDatabase = async (cart_item_id,product_id,stock_item_id) => {
+    const response = await axios.post('/api/removeFromCart', 
+      { cart_item_id,product_id,stock_item_id })
     console.log(response.data?.msg);
   }
 
@@ -242,8 +242,15 @@ function App() {
     showCart === true ? setShowCart(false) : setShowCart(true);
   };
 
-  const setProductQuantity = async (cart_item_id, quantity) => {
+  const setProductQuantity = async (cart_item_id, quantity,index) => {
     const response = await axios.post('api/updateCartItemQuantity', { cart_item_id, quantity })
+    if (response.data.success) {
+      setCart((prev)=>{
+      const newCart = [...prev]
+      newCart[0].quantity = quantity;
+      return newCart
+     })
+    }
   };
 
 

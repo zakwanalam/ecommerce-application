@@ -172,7 +172,7 @@ export function Prodcut(props) {
                           <TableCell>
                             <Badge variant="outline">{product.status}</Badge>
                           </TableCell>
-                          <TableCell>${product.stock.small.price}</TableCell>
+                          <TableCell>${product.stock[0].price}</TableCell>
                           <TableCell className="hidden md:table-cell">
                             {product.sales}
                           </TableCell>
@@ -274,7 +274,7 @@ export function Prodcut(props) {
                             <TableCell>
                               <Badge variant="outline">{product.status}</Badge>
                             </TableCell>
-                            <TableCell>${product.stock.small.price}</TableCell>
+                            <TableCell>${product.stock[0].price}</TableCell>
                             <TableCell className="hidden md:table-cell">
                               25
                             </TableCell>
@@ -377,7 +377,7 @@ export function Prodcut(props) {
                             <TableCell>
                               <Badge variant="outline">{product.status}</Badge>
                             </TableCell>
-                            <TableCell>${product.stock.small.price}</TableCell>
+                            <TableCell>${product.stock[0].price}</TableCell>
                             <TableCell className="hidden md:table-cell">
                               25
                             </TableCell>

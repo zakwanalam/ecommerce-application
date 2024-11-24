@@ -52,7 +52,7 @@ function RecentProducts(props) {
                   return b.name.localeCompare(a.name)
 
                 case 'low-price':
-                  return a.stock.small.price - b.stock.small.price
+                  return a.stock[0].price - b.stock[0].price
               }
             })
           .map((product, i) => {

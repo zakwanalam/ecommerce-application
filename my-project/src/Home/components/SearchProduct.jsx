@@ -16,7 +16,7 @@ function SearchProduct({product,setProgress,onClick}) {
       />
       <div className="flex ml-3 text-left flex-col">
         <h1 className="text-sm">{product.name}</h1>
-        <p className="text-xs">{product.stock.small.price}</p>
+        <p className="text-xs">{product.stock[0].price}</p>
       </div>
     </div>
   );

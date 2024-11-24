@@ -85,7 +85,7 @@ function Orders() {
       setWeekAmount(0)
       orders.map((element)=>{
         if(isLessThanAWeek(element.created)){
-          setWeekAmount(prev=>prev+=parseFloat(element.amount_total))
+          setWeekAmount(prev=>parseFloat(prev+=parseFloat(element.amount_total)).toFixed(2))
         }
       })
     }
@@ -93,7 +93,7 @@ function Orders() {
       setMonthAmount(0)
       orders.map((element)=>{
         if(isDateLessThanAYear(element.created)){
-          setMonthAmount(prev=>prev+=parseFloat(element.amount_total))
+          setMonthAmount(prev=>parseFloat(prev+=parseFloat(element.amount_total)).toFixed(2))
         }
       })
     }

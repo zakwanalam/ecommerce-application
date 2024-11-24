@@ -184,12 +184,11 @@ function App() {
       try {
         const response = await axios.get("/api/getProducts");
         // Convert stock property before setting state
-        const convertedProducts = response.data.product.map((product) => ({
-          ...product,
-          stock: JSON.parse(product.stock),
-        }));
+        // const convertedProducts = response.data.product.map((product) => ({
+        //   ...product,
+        // }));
 
-        setProductList(convertedProducts);
+        setProductList(response.data.product);
       } catch (error) {
         console.error(error);
       }
