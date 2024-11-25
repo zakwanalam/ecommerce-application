@@ -10,6 +10,8 @@ import getProducts from "./apiHandlers/getProducts.js";
 import saveProduct from "./apiHandlers/saveProduct.js";
 import verifyAdmin from "./apiHandlers/verifyAdmin.js";
 import verifyAdminSession from "./apiHandlers/verifyAdminSession.js";
+import deleteProduct from "./apiHandlers/deleteProduct.js";
+
 import { initializeApp } from "firebase/app";
 import {
   getDownloadURL,
@@ -128,7 +130,6 @@ app.get("/api/getReviews", (req, res) => {
     console.log("Could Not Fetch Reviews", error);
   }
 });
-
 app.delete("/api/deleteReview", (req, res) => {
   const { id } = req.query;
   const query = `DELETE from reviews where review_id=${id}`;
@@ -665,6 +666,7 @@ app.get("/api/verifyAdmin", verifyAdmin);
 app.get("/api/verifyAdminSession", verifyAdminSession);
 app.get("/api/getProducts", getProducts);
 app.post("/api/saveProduct", saveProduct);
+app.delete('/api/deleteProduct',deleteProduct)
 
 const port = process.env.PORT || 3000;
 

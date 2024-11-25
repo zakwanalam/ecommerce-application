@@ -35,6 +35,7 @@ import axios from "axios";
 import { useEffect, useState } from "react";
 import StockVariant from "./StockVariant";
 import { Cross2Icon } from "@radix-ui/react-icons";
+import { toast, ToastContainer } from "react-toastify";
 
 function ProductEdit() {
   const location = useLocation();
@@ -60,7 +61,7 @@ function ProductEdit() {
   const [imageHidden, setImageHidden] = useState(true);
   const [imageHidden2, setImageHidden2] = useState(true);
   const [imageHidden3, setImageHidden3] = useState(true);
-  const [stock,setStock] = useState(product.stock)
+  const [stock, setStock] = useState(product.stock)
   const placeholder =
     "https://upload.wikimedia.org/wikipedia/commons/3/3f/Placeholder_view_vector.svg";
   useEffect(() => console.log(product), [product]);
@@ -146,23 +147,39 @@ function ProductEdit() {
     console.log("Secondary Images", product.images_secondary);
   }, [product]);
 
+  useEffect(()=>{
+    setProduct({
+      ...product,
+      stock: stock
+    })
+  },[stock])
+
   const saveProductToDatabase = async () => {
-    const response = await axios.post("/api/saveProduct", product);
-    console.log(response.data.success);
-    if (response.data.success === true) {
-      nav("/product");
-      window.location.reload();
-      console.log(response.data.product);
+    
+    console.log(product);
+    
+    if (stock.length > 0) {
+      const response = await axios.post("/api/saveProduct", product);
+      console.log(response.data.success);
+      if (response.data.success === true) {
+        nav("/product");
+        window.location.reload();
+        console.log(response.data.product);
+      }
+
+    } else {
+      toast.error('Stock is Empty');
     }
+
   };
   console.log(product.subCategory);
   const nav = useNavigate();
-  const [toggleStockVariant,setToggle] = useState(false)
+  const [toggleStockVariant, setToggle] = useState(false)
 
   return (
     <div className="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
       <div className="mx-auto grid max-w-[59rem] relative flex-1 justify-center items-center auto-rows-max gap-4">
-        <StockVariant stock={stock} toggleStockVariant={toggleStockVariant} setToggle={setToggle}/>
+        <StockVariant stock={stock} toggleStockVariant={toggleStockVariant} setToggle={setToggle} />
         <div className="flex items-center gap-4">
           <div
             onClick={() => {
@@ -287,14 +304,14 @@ function ProductEdit() {
                             </TableCell>
                             <TableCell>
                               <Cross2Icon onClick={
-                                ()=>{
-                                  setStock((prev)=>{
-                                    return prev.filter((_,index)=>index!=i)
-                                  }
-                                  )
+                                () => {
+                                  setStock((prev) => {
+                                    return prev.filter((_, index) => index != i)
+                                  })
+                                
                                 }
 
-                              } className="scale-150 cursor-pointer text-slate-500"/>
+                              } className="scale-150 cursor-pointer text-slate-500" />
                             </TableCell>
                           </TableRow>
                         )
@@ -540,12 +557,18 @@ function ProductEdit() {
             </Card>
           </div>
         </div>
+        <ToastContainer
+          position="top-center"
+          autoClose={1000}
+          theme="light"
+        />
+
         <div className="flex items-center justify-center gap-2 md:hidden">
           <Button variant="outline" size="sm">
             Discard
           </Button>
           <Link onClick={() => console.log("rererer")}>
-            <Button size="sm">Save Product</Button>
+            <Button onClick={saveProductToDatabase} size="sm">Save Product</Button>
           </Link>
         </div>
       </div>

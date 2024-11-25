@@ -64,6 +64,19 @@ import ProductEdit from "./productEdit";
 import exportJSONToCSV from "@/csvExport";
 import { useState } from "react";
 export function Prodcut(props) {
+
+  const deleteProduct = async (productId) => {
+    console.log('hello');
+    
+    const response = await axios.delete('/api/deleteProduct', {
+      params: {
+        productId:productId
+      }
+    })
+    if(response.data.success){
+        window.location.reload()
+    }
+  }
   const [imageHidden, setImageHidden] = useState(true);
   const nav = useNavigate();
   console.log("from product", props.productList);
@@ -161,9 +174,8 @@ export function Prodcut(props) {
                               src={product.image_main}
                             />
                             <div
-                              className={` w-16 h-16 aspect-square rounded-md   bg-slate-100 ${
-                                imageHidden === true ? "animate-pulse" : ""
-                              }`}
+                              className={` w-16 h-16 aspect-square rounded-md   bg-slate-100 ${imageHidden === true ? "animate-pulse" : ""
+                                }`}
                             ></div>
                           </TableCell>
                           <TableCell className="font-medium">
@@ -202,7 +214,7 @@ export function Prodcut(props) {
                                 >
                                   Edit
                                 </DropdownMenuItem>
-                                <DropdownMenuItem>Delete</DropdownMenuItem>
+                                <DropdownMenuItem onClick={()=>{deleteProduct(product.id)}}>Delete</DropdownMenuItem>
                               </DropdownMenuContent>
                             </DropdownMenu>
                           </TableCell>
@@ -263,9 +275,8 @@ export function Prodcut(props) {
                                 src={product.image_main}
                               />
                               <div
-                                className={` w-16 h-16 aspect-square rounded-md   bg-slate-100 ${
-                                  imageHidden === true ? "animate-pulse" : ""
-                                }`}
+                                className={` w-16 h-16 aspect-square rounded-md   bg-slate-100 ${imageHidden === true ? "animate-pulse" : ""
+                                  }`}
                               ></div>
                             </TableCell>
                             <TableCell className="font-medium">
@@ -274,7 +285,7 @@ export function Prodcut(props) {
                             <TableCell>
                               <Badge variant="outline">{product.status}</Badge>
                             </TableCell>
-                            <TableCell>${product.stock[0].price}</TableCell>
+                            <TableCell>${product.stock[0]?.price || 'Please Update Stock'}</TableCell>
                             <TableCell className="hidden md:table-cell">
                               25
                             </TableCell>
@@ -304,7 +315,7 @@ export function Prodcut(props) {
                                   >
                                     Edit
                                   </DropdownMenuItem>
-                                  <DropdownMenuItem>Delete</DropdownMenuItem>
+                                  <DropdownMenuItem onClick={()=>{deleteProduct(product.id)}}>Delete</DropdownMenuItem>
                                 </DropdownMenuContent>
                               </DropdownMenu>
                             </TableCell>
@@ -366,9 +377,8 @@ export function Prodcut(props) {
                                 src={product.image_main}
                               />
                               <div
-                                className={` w-16 h-16 aspect-square rounded-md   bg-slate-100 ${
-                                  imageHidden === true ? "animate-pulse" : ""
-                                }`}
+                                className={` w-16 h-16 aspect-square rounded-md   bg-slate-100 ${imageHidden === true ? "animate-pulse" : ""
+                                  }`}
                               ></div>
                             </TableCell>
                             <TableCell className="font-medium">
@@ -407,7 +417,7 @@ export function Prodcut(props) {
                                   >
                                     Edit
                                   </DropdownMenuItem>
-                                  <DropdownMenuItem>Delete</DropdownMenuItem>
+                                  <DropdownMenuItem onClick={()=>{deleteProduct(product.id)}}>Delete</DropdownMenuItem>
                                 </DropdownMenuContent>
                               </DropdownMenu>
                             </TableCell>
@@ -469,9 +479,8 @@ export function Prodcut(props) {
                                 src={product.image_main}
                               />
                               <div
-                                className={` w-16 h-16 aspect-square rounded-md   bg-slate-100 ${
-                                  imageHidden === true ? "animate-pulse" : ""
-                                }`}
+                                className={` w-16 h-16 aspect-square rounded-md   bg-slate-100 ${imageHidden === true ? "animate-pulse" : ""
+                                  }`}
                               ></div>
                             </TableCell>
                             <TableCell className="font-medium">
@@ -510,7 +519,7 @@ export function Prodcut(props) {
                                   >
                                     Edit
                                   </DropdownMenuItem>
-                                  <DropdownMenuItem>Delete</DropdownMenuItem>
+                                  <DropdownMenuItem onClick={()=>{deleteProduct(product.id)}}> Delete</DropdownMenuItem>
                                 </DropdownMenuContent>
                               </DropdownMenu>
                             </TableCell>
