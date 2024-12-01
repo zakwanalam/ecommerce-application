@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import {
   Card,
   CardContent,
@@ -9,7 +9,12 @@ import {
 } from "@/components/ui/card";
 import { CheckCircle, CheckCircle2Icon, CheckCircleIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
-function SuccessFullPayment() {
+import axios from "axios";
+
+
+function SuccessFullPayment({cart}) {
+
+
   return (
     <section class="bg-slate-100 flex justify-center items-center h-screen">
       <div class=" duration-700  transition ease-in-out hover:-translate-y-1 hover:scale-105 hover:bg-indigo-500 flex flex-col transition-ease-in items-center justify-center mx-6  max-sm:w-screen max-sm:px-0 w-fit px-36  max-sm:h-1/2 h-fit py-16 bg-primary shadow-xl rounded-xl">

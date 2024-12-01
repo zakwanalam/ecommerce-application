@@ -20,8 +20,11 @@ function OrderRow({order,...props}) {
           Fulfilled
         </Badge>
       </TableCell>
-      <TableCell className="hidden md:table-cell">{order?.created}</TableCell>
-      <TableCell className="text-right">{order?.amount_total}</TableCell>
+      <TableCell className="hidden md:table-cell">{(()=>{
+        const date = new Date(order?.order_date)
+        return date.toUTCString()
+      })()}</TableCell>
+      <TableCell className="text-right">{order?.total_price}</TableCell>
     </TableRow>
   );
 }

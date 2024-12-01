@@ -85,7 +85,7 @@ function Orders() {
       setWeekAmount(0)
       orders.map((element)=>{
         if(isLessThanAWeek(element.created)){
-          setWeekAmount(prev=>parseFloat(prev+=parseFloat(element.amount_total)).toFixed(2))
+          setWeekAmount(prev=>parseFloat(prev+=parseFloat(element.total_price)).toFixed(2))
         }
       })
     }
@@ -93,7 +93,7 @@ function Orders() {
       setMonthAmount(0)
       orders.map((element)=>{
         if(isDateLessThanAYear(element.created)){
-          setMonthAmount(prev=>parseFloat(prev+=parseFloat(element.amount_total)).toFixed(2))
+          setMonthAmount(prev=>parseFloat(prev+=parseFloat(element.total_price)).toFixed(2))
         }
       })
     }
@@ -108,15 +108,18 @@ function Orders() {
   useEffect(() => {
     const getOrders = async () => {
       const allOrders = await axios.get("/api/getOrders");
-      setOrders(allOrders.data.sessions);
+      setOrders(allOrders.data.result);
     };
     getOrders();
-    console.log(orders);
   }, []);
   useEffect(() => {
+    console.log('These are orders',orders);
     console.log(cardCount);
   }, [cardCount]);
-
+  useEffect(()=>{
+    console.log('Orders',orders);
+    
+  },[orders])
   const isDateLessThanAMonth = (date) => {
     const then = new Date(date);
     const now = new Date();
@@ -271,7 +274,7 @@ function Orders() {
                     </TableHeader>
                     <TableBody>
                       {orders.map((session, i) => {
-                        if (isLessThan3Days(session.created)) {
+                        if (isLessThan3Days(session.order_date)) {
                           return (
                             <>
                               <OrderRow
@@ -329,7 +332,7 @@ function Orders() {
                     <TableBody>
                       {orders.length > 0 ? (
                         orders.map((session, i) => {
-                          if (isLessThanAWeek(session.created)) {
+                          if (isLessThanAWeek(session.order_date)) {
                             return (
                               <>
                                 <OrderRow
@@ -390,7 +393,7 @@ function Orders() {
                     </TableHeader>
                     <TableBody>
                       {orders.map((session, i) => {
-                        if (isDateLessThanAMonth(session.created)) {
+                        if (isDateLessThanAMonth(session.order_date)) {
                           return (
                             <>
                               <OrderRow
@@ -438,8 +441,8 @@ function Orders() {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {orders.map((session, i) => {
-                        if (isDateLessThanAYear(session.created)) {
+                      {orders?.map((session, i) => {
+                        if (isDateLessThanAYear(session.order_date)) {
                           return (
                             <>
                               <OrderRow

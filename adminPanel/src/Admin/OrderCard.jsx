@@ -61,11 +61,11 @@ function OrderCard({ setCardCount, order, cardCount, orderLength }) {
       <CardHeader className="flex flex-row items-start bg-muted/50">
         <div className="grid gap-0.5">
           <CardTitle className="group flex items-center gap-2 text-lg ">
-            {order.id.slice(0, 20)}...
+            {order?.id.slice(0, 20)}...
             <Button
               size="icon"
               variant="outline"
-              onClick={() => handleCopy(order.id)}
+              onClick={() => handleCopy(order?.id)}
               className="h-6 w-6 opacity-0 transition-opacity group-hover:opacity-100"
             >
               <Copy id="copy" className="h-3 w-3 " />
@@ -102,13 +102,14 @@ function OrderCard({ setCardCount, order, cardCount, orderLength }) {
         <div className="grid gap-3">
           <div className="font-semibold">Order Details</div>
           <ul className="grid gap-3">
-            {order?.products.map((product, index) => {
+            {order?.products?.map((product, index) => {
               return (
                 <li className="flex items-center justify-between">
                   <span className="text-muted-foreground">
-                    <span> {product?.product.name}</span>
+                    <span> {product?.product_name}</span>
+                    <span className="px-2">x{product?.quantity}</span>
                   </span>
-                  <span>{product?.product.amountTotal}</span>
+                  <span>{product?.subtotal?product?.subtotal:product?.unit_price}</span>
                 </li>
               );
             })}
@@ -117,7 +118,7 @@ function OrderCard({ setCardCount, order, cardCount, orderLength }) {
           <ul className="grid gap-3">
             <li className="flex items-center justify-between font-semibold">
               <span className="text-muted-foreground">Total</span>
-              <span>${order?.amount_total}</span>
+              <span>${order?.total_price}</span>
             </li>
           </ul>
         </div>
@@ -126,9 +127,9 @@ function OrderCard({ setCardCount, order, cardCount, orderLength }) {
           <div className="grid gap-3">
             <div className="font-semibold">Shipping Information</div>
             <address className="grid gap-0.5 not-italic text-muted-foreground">
-              <span>{order.customer_details.name}</span>
-              <span>{order.customer_details.address.line1}</span>
-              <span>{order.customer_details.address?.line2}</span>
+              <span>{order?.customer_details.name}</span>
+              <span>{order?.customer_details.address.line1}</span>
+              <span>{order?.customer_details.address?.line2}</span>
               <span>{`${order?.customer_details.address.city} , ${order?.customer_details.address.country}`}</span>
             </address>
           </div>
@@ -168,9 +169,9 @@ function OrderCard({ setCardCount, order, cardCount, orderLength }) {
             <div className="flex items-center justify-between">
               <dt className="flex items-center gap-1 text-muted-foreground">
                 <CreditCard className="h-4 w-4" />
-                {order.card_brand.toUpperCase()}
+                {order.card?.toUpperCase()}
               </dt>
-              <dd>**** **** **** {order?.card_last4}</dd>
+              <dd>**** **** **** {order?.last4}</dd>
             </div>
           </dl>
         </div>

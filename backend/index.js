@@ -12,6 +12,7 @@ import verifyAdmin from "./apiHandlers/verifyAdmin.js";
 import verifyAdminSession from "./apiHandlers/verifyAdminSession.js";
 import deleteProduct from "./apiHandlers/deleteProduct.js";
 
+
 import { initializeApp } from "firebase/app";
 import {
   getDownloadURL,
@@ -23,6 +24,7 @@ import {
 import { loadStripe } from "@stripe/stripe-js";
 import Stripe from "stripe";
 import getUser from "./apiHandlers/getUser.js";
+
 const app = e();
 
 const firebaseConfig = {
@@ -151,64 +153,67 @@ app.get("/api/getSessions", async (req, res) => {
 
   res.json({ sessions: sessions.length });
 });
-app.get("/api/getOrders", async (req, res) => {
-  try {
-    const sessions = await stripe.checkout.sessions.list({ limit: 10 });
-    const filteredSessions = sessions.data.filter(
-      (session) => session.payment_status === "paid"
-    );
-    const sessionsWithDetails = await Promise.all(
-      filteredSessions.map(async (session) => {
-        const lineItems = await stripe.checkout.sessions.listLineItems(
-          session.id
-        );
+app.get('/api/getOrders', (req, res) => {
+  const getSessionQuery = 'SELECT stripe_session_id, total_price, status, order_date FROM orders';
+  const getOrderProducts = 'SELECT product_id,product_name,unit_price,size,subtotal,quantity from orderview where stripe_session_id = ?'
+  db.query(getSessionQuery, async (err, result) => {
+    if (err) {
+      console.error('Database Error:', err);
+      return res.status(500).send({ success: false, msg: 'Database Error' });
+    }
 
-        const paymentIntent = await stripe.paymentIntents.retrieve(
-          session.payment_intent
-        );
-        const paymentMethodId = paymentIntent.payment_method;
-
-        const paymentMethod = await stripe.paymentMethods.retrieve(
-          paymentMethodId
-        );
-
-        const lineItemsWithProductDetails = await Promise.all(
-          lineItems.data.map(async (item) => {
-            const product = await stripe.products.retrieve(item.price.product);
+    try {
+      const ordersWithDetails = await Promise.all(
+        result.map(async (order) => {
+          try {
+            const { id, customer_details, payment_intent } = await stripe.checkout.sessions.retrieve(order.stripe_session_id);
+            const lineItems = await stripe.checkout.sessions.listLineItems(order.stripe_session_id)
+            const filteredLineItems = 
+            lineItems.data.filter((item) => item.description==='Shipping' || item.description==='Tax')
+            .map((item)=>({product_name:item.description,unit_price:parseFloat(item.amount_total)/100}));
+            
+            const paymentIntent = await stripe.paymentIntents.retrieve(payment_intent);
+            const paymentMethodObject = await stripe.paymentMethods.retrieve(paymentIntent.payment_method);
+            const productResult = await new Promise((resolve, reject) => {
+              db.query(getOrderProducts, [order.stripe_session_id], (productError, productResult) => {
+                if (productError) {
+                  reject(productError); // Reject if there's an error
+                } else {
+                  resolve(productResult); // Resolve with the product result
+                }
+              });
+              
+            });
+            filteredLineItems.forEach((item)=>{
+              productResult.push(item)
+            })
             return {
-              product: {
-                id: product.id,
-                name: product.name,
-                images: product.images,
-                amountTotal: (item.amount_total / 100).toFixed(2),
-                quantity: item.quantity,
-                product_id: product.metadata.product_id,
-              },
+              ...order,
+              id,
+              customer_details,
+              card: paymentMethodObject.card.brand,
+              last4: paymentMethodObject.card.last4,
+              products: productResult,
             };
-          })
-        );
-        return {
-          id: session.id,
-          amount_total: (session.amount_total / 100).toFixed(2),
-          amount_subtotal: (session.amount_subtotal / 100).toFixed(2),
-          currency: session.currency,
-          card_brand: paymentMethod.card.brand,
-          card_last4: paymentMethod.card.last4,
-          created: new Date(session.created * 1000).toISOString(),
-          customer_details: await session.customer_details,
-          products: lineItemsWithProductDetails,
-        };
-      })
-    );
+          } catch (stripeError) {
+            console.error('Stripe Error for Order:', order.stripe_session_id, stripeError);
+            // Return the original order without payment details if Stripe call fails
+            return {
+              ...order,
+              error: 'Failed to retrieve payment details',
+            };
+          }
+        })
+      );
 
-    res.json({ success: true, sessions: sessionsWithDetails });
-  } catch (error) {
-    console.error("Error retrieving Checkout Sessions:", error);
-    res
-      .status(500)
-      .json({ success: false, message: "Failed to retrieve sessions" });
-  }
+      res.status(200).send({ success: true, result: ordersWithDetails, msg: 'Orders Retrieved Successfully' });
+    } catch (error) {
+      console.error('Unexpected Error:', error);
+      res.status(500).send({ success: false, msg: 'Failed to retrieve orders' });
+    }
+  });
 });
+
 app.post("/api/uploadProfilePic", (req, res) => {
   const { url } = req.body;
   const { email } = jwt.decode(req.cookies.token);
@@ -506,14 +511,14 @@ app.post('/api/removeFromCart', async (req, res) => {
           console.log("Cart Id Not Found", err.code);
           return res.status(500).json({ success: false, msg: 'Failed to delete by cart_item_id' });
         }
-        else if(results.length>0) {
-          
+        else if (results.length > 0) {
+
           return res.status(200).json({ success: true, msg: 'Cart item deleted successfully' });
         }
       })
     }
     else {
-      db.query(deleteFromPrimary, [email, product_id, stock_item_id], (err,results) => {
+      db.query(deleteFromPrimary, [email, product_id, stock_item_id], (err, results) => {
         if (err) {
           console.log("Cart Id Not Found", err.code);
           return res.status(500).json({ success: false, msg: 'Failed to delete item' });
@@ -566,7 +571,6 @@ app.get('/api/getCart', (req, res) => {
       if (err) {
         console.log(err);
       }
-
       res.send({ cart: results, success: true })
     })
   } catch (error) {
@@ -666,7 +670,7 @@ app.get("/api/verifyAdmin", verifyAdmin);
 app.get("/api/verifyAdminSession", verifyAdminSession);
 app.get("/api/getProducts", getProducts);
 app.post("/api/saveProduct", saveProduct);
-app.delete('/api/deleteProduct',deleteProduct)
+app.delete('/api/deleteProduct', deleteProduct)
 
 const port = process.env.PORT || 3000;
 
@@ -677,10 +681,25 @@ app.listen(port, () => {
 const stripe = Stripe(
   "sk_test_51NDIgmQY69KQ4gJj7BpV9kB0DVHmcByTZxjH6W0CNWofMoQWPsrkvBYs3VtooB0C0pQfToxq2DeAtwxXU8pEJ1Nq00UhvDUfzz"
 );
+// app.post('/api/storeCartToCookies', (req, res) => {
+//   const { products } = req.body;
+//   console.log('From faf',products);
 
+//   const options = {
+//     expires: new Date(Date.now() + 24 * 60 * 60 * 1000), // 1 day expiry
+//     httpOnly: false, // Allow access from the frontend
+//     path: '/', // Accessible across the site
+//   };
+//   res.cookie('cartProducts', JSON.stringify(products), options).send({
+//     success: true,
+//     message: 'Cart stored in cookie successfully!',
+//   });
+// });
 app.post("/api/checkout", async (req, res) => {
   try {
     const { products, tax, discount, shipping } = req.body;
+    console.log(products);
+
     console.log("checkout", products);
     const lineItems = products.map((product) => ({
       price_data: {
@@ -690,7 +709,7 @@ app.post("/api/checkout", async (req, res) => {
           images: [product.image_main],
           metadata: { product_id: product.id },
         },
-        unit_amount: Math.round(product.stock.small.price * 100),
+        unit_amount: Math.round(product.price * 100),
       },
       quantity: product.quantity,
     }));
@@ -733,13 +752,11 @@ app.post("/api/checkout", async (req, res) => {
         quantity: 1,
       });
     }
-
-
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ["card"],
       line_items: lineItems,
       mode: "payment",
-      success_url: "http://localhost:5173/paymentSuccess?checkout=true",
+      success_url: "http://localhost:3000/api/storeOrder?session_id={CHECKOUT_SESSION_ID}",
       cancel_url: "http://localhost:5173/paymentFail",
       billing_address_collection: "required",
       phone_number_collection: {
@@ -751,5 +768,62 @@ app.post("/api/checkout", async (req, res) => {
   } catch (error) {
     console.error("Error creating Stripe checkout session:", error);
     res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
+app.post('/api/testApi', (req, res) => {
+  res.send({ msg: 'hello world' })
+})
+app.get('/api/storeOrder', async (req, res) => {
+  const { session_id } = req.query;
+
+  // Retrieve session from Stripe API
+  const session = await stripe.checkout.sessions.retrieve(session_id);
+  const amount_total = session.amount_total;
+  const email = session.customer_details.email;
+  const date = new Date(session.created * 1000);
+
+  // Get the cart items from the database
+  const getCartQuery =
+    `SELECT c.cart_item_id, p.*, s.stock_item_id, s.price, s.size, c.quantity
+      FROM users as u
+      JOIN cart as c ON u.email = c.email
+      JOIN product p ON p.id = c.product_id
+      JOIN stock s ON s.stock_item_id = c.stock_item_id
+      WHERE u.email = ?`;
+
+  try {
+    // Query the cart data
+    db.query(getCartQuery, email, (err, cart) => {
+      if (err) {
+        console.log(err);
+        return res.status(500).send({ success: false, msg: 'Error fetching cart' });
+      }
+
+      // Insert the order into the orders table
+      const query = 'INSERT INTO orders (email, order_date, status, total_price, stripe_session_id) VALUES (?, ?, ?, ?, ?)';
+      db.query(query, [email, date, 'Processing', amount_total/100, session_id], (err, insertResult) => {
+        if (err) {
+          console.log(err);
+          return res.status(500).send({ success: false, msg: 'Error creating order' });
+        }
+
+        // Insert each cart item into the order_items table
+        const order_items_query = `INSERT INTO order_items (stripe_session_id, stock_item_id, quantity, unit_price) VALUES (?, ?, ?, ?)`;
+        cart.forEach(product => {
+          db.query(order_items_query, [session_id, product.stock_item_id, product.quantity, product.price], (err) => {
+            if (err) {
+              console.log(err);
+            }
+          });
+        });
+
+        // Once the order items are inserted, redirect the user
+        res.redirect(`http://localhost:5173/paymentSuccess?session_id=${session_id}`);
+      });
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({ success: false, msg: 'Server error' });
   }
 });

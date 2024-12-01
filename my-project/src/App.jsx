@@ -143,17 +143,17 @@ function App() {
         }
         console.log(sessionResponse.data);
         const query = new URLSearchParams(location.search);
-        const checkout = query.get("checkout");
-        console.log(checkout);
+        // const checkout = query.get("checkout");
+        // console.log(checkout);
 
-        if (checkout === "true") {
-          setCart((prevCart) => {
-            saveCartToDatabase([]);
-            return [];
-          });
-          query.set("checkout", "false");
-          history({ search: query.toString() }, { replace: true });
-        }
+        // // if (checkout === "true") {
+        // //   setCart((prevCart) => {
+        // //     saveCartToDatabase([]);
+        // //     return [];
+        // //   });
+        // //   query.set("checkout", "false");
+        // //   history({ search: query.toString() }, { replace: true });
+        // // }
       } catch (error) {
         console.error("Error:", error);
       }
@@ -339,7 +339,7 @@ function App() {
         <Route path="/product" element={<ProductPage addToCart={addToCart} setProgress={setProgress} loginStatus={loginLabel} />} ></Route>
       </Routes>
       <Routes>
-        <Route path="/paymentSuccess" element={<SuccessFullPayment />}></Route>
+        <Route path="/paymentSuccess" element={<SuccessFullPayment cart={cart}/>}></Route>
         <Route path="/paymentFail" element={<UnSuccessFullPayment />}></Route>
       </Routes>
       {isHome && <>{appMode === "user" ? <Footer /> : null}</>}

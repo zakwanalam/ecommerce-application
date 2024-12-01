@@ -57,6 +57,11 @@ export default function Cart(props) {
     setDisable((prev) => true)
     const stripe = await loadStripe('pk_test_51NDIgmQY69KQ4gJjN1tgyaVi6r5hi6L8l1BlEWQhdEoM8DR5NPC46Ql8ae3WkTwzpSXpBMX5qvpQzCK1g1LxaHmo00nuCOYQpr'); // Use your publishable key here
     try {
+      setTimeout(()=>{
+        (async()=>{
+          await axios.post('/api/storeCartToCookies',{products:props.cart})
+        })();
+      })
       const response = await axios.post('/api/checkout', {
         products: props.cart, tax: tax,
         discount: discount,
@@ -64,7 +69,6 @@ export default function Cart(props) {
       });
 
       console.log('checout ongoing');
-
       const result = await stripe.redirectToCheckout({
         sessionId: response.data.id,
       });
