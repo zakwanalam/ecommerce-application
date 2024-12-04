@@ -84,16 +84,18 @@ function Orders() {
     const weekAmount  = ()=>{
       setWeekAmount(0)
       orders.map((element)=>{
-        if(isLessThanAWeek(element.created)){
-          setWeekAmount(prev=>parseFloat(prev+=parseFloat(element.total_price)).toFixed(2))
+        if(isLessThanAWeek(element.order_date)){
+          console.log('this is element',element);
+          
+          setWeekAmount(prev=>prev+=element.total_price)
         }
       })
     }
     const monthAmount = ()=>{
       setMonthAmount(0)
       orders.map((element)=>{
-        if(isDateLessThanAYear(element.created)){
-          setMonthAmount(prev=>parseFloat(prev+=parseFloat(element.total_price)).toFixed(2))
+        if(isDateLessThanAYear(element.order_date)){
+          setMonthAmount(prev=>prev+=element.total_price)
         }
       })
     }
@@ -133,7 +135,6 @@ function Orders() {
     const then = new Date(date);
     const oneYearAgo = new Date(Date.now());
     oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
-
     return then > oneYearAgo;
   };
 
@@ -207,7 +208,7 @@ function Orders() {
                 <TabsTrigger value="month">Month</TabsTrigger>
                 <TabsTrigger value="year">Year</TabsTrigger>
               </TabsList>
-              <div className="ml-auto flex items-center gap-2">
+              {/* <div className="ml-auto flex items-center gap-2">
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button
@@ -241,7 +242,7 @@ function Orders() {
                   <File className="h-3.5 w-3.5" />
                   <span className="sr-only sm:not-sr-only">Export</span>
                 </Button>
-              </div>
+              </div> */}
             </div>
             <TabsContent value="3days">
               <Card x-chunk="dashboard-05-chunk-3">

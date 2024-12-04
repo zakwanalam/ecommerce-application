@@ -192,13 +192,14 @@ function App() {
     const response = await axios.post("/api/addToCart", { productId, quantity,stock_item_id});    
     if (response.data.success===true) {
       const { image_secondary_1, image_secondary_2, ...productWithoutImage } =
-        productList.find((product) => product.id === productId)
+      productList.find((product) => product.id === productId)
       console.log(index);
 
       setCart((prevCart) => {
         const myCart = [...prevCart];
         myCart.push({
           ...productWithoutImage,
+          cart_item_id:response.data.cart_item_id,
           stock_item_id:stock_item_id,
           size:size,
           price:price,
@@ -243,6 +244,8 @@ function App() {
   };
 
   const setProductQuantity = async (cart_item_id, quantity,index) => {
+    console.log('quantityupdated',quantity);
+    
     const response = await axios.post('api/updateCartItemQuantity', { cart_item_id, quantity })
     if (response.data.success) {
       setCart((prev)=>{

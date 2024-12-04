@@ -17,7 +17,7 @@ function OrderRow({order,...props}) {
       <TableCell className="hidden sm:table-cell">Sale</TableCell>
       <TableCell className="hidden sm:table-cell">
         <Badge className="text-xs" variant="secondary">
-          Fulfilled
+          {order?.status}
         </Badge>
       </TableCell>
       <TableCell className="hidden md:table-cell">{(()=>{

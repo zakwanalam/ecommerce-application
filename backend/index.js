@@ -485,8 +485,8 @@ app.post("/api/addToCart", (req, res) => {
       return res.status(401).send('Duplicate Entry')
     }
     if (results.affectedRows > 0) {
-      console.log("Product Added To Cart");
-      res.send({ success: true });
+      console.log("Product Added To Cart",results.insertId);
+      res.send({ success: true ,cart_item_id:results.insertId});
     } else {
       res.send("Error While storing cart");
     }
@@ -534,16 +534,17 @@ app.post('/api/removeFromCart', async (req, res) => {
 
 })
 app.post('/api/updateCartItemQuantity', (req, res) => {
+  
   const { cart_item_id, quantity } = req.body;
+  console.log(cart_item_id,quantity);
 
   const query = 'UPDATE cart SET quantity = ? WHERE cart_item_id = ?'
 
   try {
     db.query(query, [quantity, cart_item_id], (err, results) => {
       if (err) { throw err }
-      else {
+      else if(results.affectedRows>0){
         console.log('Cart Item Quantity Updated Successfully');
-
         res.send({ success: true })
       }
     });

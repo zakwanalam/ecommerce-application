@@ -32,7 +32,7 @@ export default function Cart(props) {
     setShipping(10);
     const total = parseFloat([subtotal + shipping + tax + discount]).toFixed(2)
     setTotal("$" + total.toString());
-
+    
     setDisable(props.cart.length === 0 || clicked)
 
   });

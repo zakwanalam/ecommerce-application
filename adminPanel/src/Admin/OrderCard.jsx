@@ -107,7 +107,7 @@ function OrderCard({ setCardCount, order, cardCount, orderLength }) {
                 <li className="flex items-center justify-between">
                   <span className="text-muted-foreground">
                     <span> {product?.product_name}</span>
-                    <span className="px-2">x{product?.quantity}</span>
+                    <span className="px-2">x{product?.quantity?product?.quantity:1}</span>
                   </span>
                   <span>{product?.subtotal?product?.subtotal:product?.unit_price}</span>
                 </li>

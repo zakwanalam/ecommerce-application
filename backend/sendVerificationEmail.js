@@ -11,7 +11,7 @@ export async function sendVerificationEmail(
       port: 465,
       auth: {
         user: "zakwanalam07@gmail.com",
-        pass: "mnsm bygh snmy qhhd",
+        pass: "sjjc nwls uqxr nqjs",
       },
     });
   
