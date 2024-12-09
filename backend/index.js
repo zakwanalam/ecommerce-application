@@ -24,6 +24,7 @@ import {
 import { loadStripe } from "@stripe/stripe-js";
 import Stripe from "stripe";
 import getUser from "./apiHandlers/getUser.js";
+import { sendOrderConfirmationEmail } from "./sendOrderConfirmationEmail.js";
 
 const app = e();
 
@@ -168,10 +169,10 @@ app.get('/api/getOrders', (req, res) => {
           try {
             const { id, customer_details, payment_intent } = await stripe.checkout.sessions.retrieve(order.stripe_session_id);
             const lineItems = await stripe.checkout.sessions.listLineItems(order.stripe_session_id)
-            const filteredLineItems = 
-            lineItems.data.filter((item) => item.description==='Shipping' || item.description==='Tax')
-            .map((item)=>({product_name:item.description,unit_price:parseFloat(item.amount_total)/100}));
-            
+            const filteredLineItems =
+              lineItems.data.filter((item) => item.description === 'Shipping' || item.description === 'Tax')
+                .map((item) => ({ product_name: item.description, unit_price: parseFloat(item.amount_total) / 100 }));
+
             const paymentIntent = await stripe.paymentIntents.retrieve(payment_intent);
             const paymentMethodObject = await stripe.paymentMethods.retrieve(paymentIntent.payment_method);
             const productResult = await new Promise((resolve, reject) => {
@@ -182,9 +183,9 @@ app.get('/api/getOrders', (req, res) => {
                   resolve(productResult); // Resolve with the product result
                 }
               });
-              
+
             });
-            filteredLineItems.forEach((item)=>{
+            filteredLineItems.forEach((item) => {
               productResult.push(item)
             })
             return {
@@ -485,8 +486,8 @@ app.post("/api/addToCart", (req, res) => {
       return res.status(401).send('Duplicate Entry')
     }
     if (results.affectedRows > 0) {
-      console.log("Product Added To Cart",results.insertId);
-      res.send({ success: true ,cart_item_id:results.insertId});
+      console.log("Product Added To Cart", results.insertId);
+      res.send({ success: true, cart_item_id: results.insertId });
     } else {
       res.send("Error While storing cart");
     }
@@ -534,16 +535,16 @@ app.post('/api/removeFromCart', async (req, res) => {
 
 })
 app.post('/api/updateCartItemQuantity', (req, res) => {
-  
+
   const { cart_item_id, quantity } = req.body;
-  console.log(cart_item_id,quantity);
+  console.log(cart_item_id, quantity);
 
   const query = 'UPDATE cart SET quantity = ? WHERE cart_item_id = ?'
 
   try {
     db.query(query, [quantity, cart_item_id], (err, results) => {
       if (err) { throw err }
-      else if(results.affectedRows>0){
+      else if (results.affectedRows > 0) {
         console.log('Cart Item Quantity Updated Successfully');
         res.send({ success: true })
       }
@@ -572,6 +573,8 @@ app.get('/api/getCart', (req, res) => {
       if (err) {
         console.log(err);
       }
+      console.log('usrCart',results);
+      
       res.send({ cart: results, success: true })
     })
   } catch (error) {
@@ -735,7 +738,7 @@ app.post("/api/checkout", async (req, res) => {
           product_data: {
             name: "Discount",
           },
-          unit_amount: Math.round(-discount * 100), // negative amount for discount
+          unit_amount: Math.round(-discount * 100),
         },
         quantity: 1,
       });
@@ -753,6 +756,8 @@ app.post("/api/checkout", async (req, res) => {
         quantity: 1,
       });
     }
+    const {token} = req.cookies
+    const {email} = jwt.decode(token)
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ["card"],
       line_items: lineItems,
@@ -763,8 +768,10 @@ app.post("/api/checkout", async (req, res) => {
       phone_number_collection: {
         enabled: true, // Enable phone number collection
       },
+      customer_email:email
     });
-
+    console.log('session id is:',session.id);
+    
     res.send({ id: session.id });
   } catch (error) {
     console.error("Error creating Stripe checkout session:", error);
@@ -803,7 +810,7 @@ app.get('/api/storeOrder', async (req, res) => {
 
       // Insert the order into the orders table
       const query = 'INSERT INTO orders (email, order_date, status, total_price, stripe_session_id) VALUES (?, ?, ?, ?, ?)';
-      db.query(query, [email, date, 'Processing', amount_total/100, session_id], (err, insertResult) => {
+      db.query(query, [email, date, 'Processing', amount_total / 100, session_id], async(err, insertResult) => {
         if (err) {
           console.log(err);
           return res.status(500).send({ success: false, msg: 'Error creating order' });
@@ -818,7 +825,13 @@ app.get('/api/storeOrder', async (req, res) => {
             }
           });
         });
-
+        let response = false
+        let maxRetries = 3;
+        let attempts =0;
+        while(!response && attempts<=maxRetries){
+          attempts++;
+          response = await sendOrderConfirmationEmail(cart,email)
+        }
         // Once the order items are inserted, redirect the user
         res.redirect(`http://localhost:5173/paymentSuccess?session_id=${session_id}`);
       });

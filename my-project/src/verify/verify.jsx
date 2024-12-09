@@ -12,8 +12,9 @@ import { useLocation, useParams } from "react-router-dom";
 import { toast, useToast } from "@/components/ui/use-toast";
 import { Toaster } from "@/components/ui/toaster";
 import { useNavigate } from "react-router-dom";
+import useLoadingNavigation from "@/LoadingNavigation/LoadingNavigation";
 
-function Verify() {
+function Verify({setProgress}) {
   const location = useLocation()
   const params = new URLSearchParams(location.search) 
   const email = params.get('email')
@@ -22,6 +23,8 @@ function Verify() {
   const [otp,setValue] = useState('')
   const navigate = useNavigate()
   console.log(params.get('email'))
+
+  const loadingNavigation =   useLoadingNavigation(setProgress)
 
   const handleSubmit = async ()=>{
       console.log(otp)
@@ -38,7 +41,7 @@ function Verify() {
           description:"Your Account Has Been Successfully Verified"
         })
         setTimeout(()=>{
-          navigate('/home')
+          loadingNavigation('/login')
         },2000)
       }
       else{
@@ -67,7 +70,7 @@ function Verify() {
     <div className="flex flex-col min-h-screen items-center bg-indigo-950 justify-center bg-slate-100">
       <div class="flex flex-col max-w-md max-h-full mx-auto text-center justify-center items-center bg-white px-4 sm:px-8 py-10 rounded-xl shadow">
         <header class="mb-8">
-          <h1 class="text-2xl font-bold mb-1">Mobile Phone Verification</h1>
+          <h1 class="text-2xl font-bold mb-1">Email OTP Verification</h1>
           <p class="text-[15px] text-slate-500">
             Enter the 4-digit verification code that was sent to your phone
             number.

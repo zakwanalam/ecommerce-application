@@ -19,6 +19,7 @@ import { boolean } from "zod";
 import { loadStripe } from "@stripe/stripe-js";
 import { Toaster } from "@/components/ui/toaster";
 import { toast, useToast } from "@/components/ui/use-toast";
+import ProductRating from "./components/ProductRating";
 
 function ProductPage(props) {
   const [user, setUser] = useState({});
@@ -53,12 +54,12 @@ function ProductPage(props) {
   }
   const location = useLocation();
 
-  const { id, name, price , image,
-    description, secondaryImage1, 
-    secondaryImage2, stock, index } = 
+  const { id, name, price, image,
+    description, secondaryImage1,
+    secondaryImage2, stock, index } =
     location.state || {};
 
-  const [itemPrice,setItemPrice] = useState(price)
+  const [itemPrice, setItemPrice] = useState(price)
   console.log('This is stock', stock);
   const [stock_item_id, setStockItemID] = useState(stock[0].stock_item_id)
   const [sizeButton, sizeButtonClicked] = useState(stock[0].size)
@@ -93,17 +94,15 @@ function ProductPage(props) {
 
 
   const handleBuyNow = async () => {
+    console.log('buy now');
+
     const stripe = await loadStripe('pk_test_51NDIgmQY69KQ4gJjN1tgyaVi6r5hi6L8l1BlEWQhdEoM8DR5NPC46Ql8ae3WkTwzpSXpBMX5qvpQzCK1g1LxaHmo00nuCOYQpr'); // Use your publishable key here
     try {
       const products = [{
         id: id,
         name: name,
         image_main: image,
-        stock: {
-          small: {
-            price: price
-          }
-        },
+        price: itemPrice,
         quantity: quantity,
       }]
       const tax = price * 13 / 100
@@ -131,12 +130,13 @@ function ProductPage(props) {
 
   const { toast } = useToast()
   const addToCart = () => {
-    props.addToCart(id, index, stock_item_id,itemPrice,quantity,sizeButton)
+    props.addToCart(id, index, stock_item_id, itemPrice, quantity, sizeButton)
     toast({
       title: `Item Added: ${name} `
     })
   }
   const [filteredReviews, setfilteredReviews] = useState([]);
+  const [avgRating, setAvgRating] = useState(1);
   useEffect(() => {
     const profilePic = async () => {
       const res = await axios.get("/api/getProfilePic");
@@ -147,9 +147,24 @@ function ProductPage(props) {
       const res = await axios.get("/api/getReviews");
       setfilteredReviews(res.data.reviews.filter((review) => review.product_id === id));
     };
+
     profilePic();
     getReviews();
   }, []);
+
+  useEffect(() => {
+    const getAvgRating = () => {
+      let ratingSum = 0
+      let reviewCount = filteredReviews.length
+      filteredReviews.map((review) => {
+        ratingSum += review.rating
+      })
+      setAvgRating(ratingSum / reviewCount)
+    }
+    getAvgRating()
+
+  }, [filteredReviews])
+
   useEffect(() => console.log("reviews", filteredReviews));
   console.log(name, price, image, description);
 
@@ -238,104 +253,10 @@ function ProductPage(props) {
                   </h6>
                   <div className="flex items-center gap-2">
                     <div className="flex items-center gap-1">
-                      <svg
-                        width={20}
-                        height={20}
-                        viewBox="0 0 20 20"
-                        fill="none"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <g clipPath="url(#clip0_12029_1640)">
-                          <path
-                            d="M9.10326 2.31699C9.47008 1.57374 10.5299 1.57374 10.8967 2.31699L12.7063 5.98347C12.8519 6.27862 13.1335 6.48319 13.4592 6.53051L17.5054 7.11846C18.3256 7.23765 18.6531 8.24562 18.0596 8.82416L15.1318 11.6781C14.8961 11.9079 14.7885 12.2389 14.8442 12.5632L15.5353 16.5931C15.6754 17.41 14.818 18.033 14.0844 17.6473L10.4653 15.7446C10.174 15.5915 9.82598 15.5915 9.53466 15.7446L5.91562 17.6473C5.18199 18.033 4.32456 17.41 4.46467 16.5931L5.15585 12.5632C5.21148 12.2389 5.10393 11.9079 4.86825 11.6781L1.94038 8.82416C1.34687 8.24562 1.67438 7.23765 2.4946 7.11846L6.54081 6.53051C6.86652 6.48319 7.14808 6.27862 7.29374 5.98347L9.10326 2.31699Z"
-                            fill="#FBBF24"
-                          />
-                        </g>
-                        <defs>
-                          <clipPath id="clip0_12029_1640">
-                            <rect width={20} height={20} fill="white" />
-                          </clipPath>
-                        </defs>
-                      </svg>
-                      <svg
-                        width={20}
-                        height={20}
-                        viewBox="0 0 20 20"
-                        fill="none"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <g clipPath="url(#clip0_12029_1640)">
-                          <path
-                            d="M9.10326 2.31699C9.47008 1.57374 10.5299 1.57374 10.8967 2.31699L12.7063 5.98347C12.8519 6.27862 13.1335 6.48319 13.4592 6.53051L17.5054 7.11846C18.3256 7.23765 18.6531 8.24562 18.0596 8.82416L15.1318 11.6781C14.8961 11.9079 14.7885 12.2389 14.8442 12.5632L15.5353 16.5931C15.6754 17.41 14.818 18.033 14.0844 17.6473L10.4653 15.7446C10.174 15.5915 9.82598 15.5915 9.53466 15.7446L5.91562 17.6473C5.18199 18.033 4.32456 17.41 4.46467 16.5931L5.15585 12.5632C5.21148 12.2389 5.10393 11.9079 4.86825 11.6781L1.94038 8.82416C1.34687 8.24562 1.67438 7.23765 2.4946 7.11846L6.54081 6.53051C6.86652 6.48319 7.14808 6.27862 7.29374 5.98347L9.10326 2.31699Z"
-                            fill="#FBBF24"
-                          />
-                        </g>
-                        <defs>
-                          <clipPath id="clip0_12029_1640">
-                            <rect width={20} height={20} fill="white" />
-                          </clipPath>
-                        </defs>
-                      </svg>
-                      <svg
-                        width={20}
-                        height={20}
-                        viewBox="0 0 20 20"
-                        fill="none"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <g clipPath="url(#clip0_12029_1640)">
-                          <path
-                            d="M9.10326 2.31699C9.47008 1.57374 10.5299 1.57374 10.8967 2.31699L12.7063 5.98347C12.8519 6.27862 13.1335 6.48319 13.4592 6.53051L17.5054 7.11846C18.3256 7.23765 18.6531 8.24562 18.0596 8.82416L15.1318 11.6781C14.8961 11.9079 14.7885 12.2389 14.8442 12.5632L15.5353 16.5931C15.6754 17.41 14.818 18.033 14.0844 17.6473L10.4653 15.7446C10.174 15.5915 9.82598 15.5915 9.53466 15.7446L5.91562 17.6473C5.18199 18.033 4.32456 17.41 4.46467 16.5931L5.15585 12.5632C5.21148 12.2389 5.10393 11.9079 4.86825 11.6781L1.94038 8.82416C1.34687 8.24562 1.67438 7.23765 2.4946 7.11846L6.54081 6.53051C6.86652 6.48319 7.14808 6.27862 7.29374 5.98347L9.10326 2.31699Z"
-                            fill="#FBBF24"
-                          />
-                        </g>
-                        <defs>
-                          <clipPath id="clip0_12029_1640">
-                            <rect width={20} height={20} fill="white" />
-                          </clipPath>
-                        </defs>
-                      </svg>
-                      <svg
-                        width={20}
-                        height={20}
-                        viewBox="0 0 20 20"
-                        fill="none"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <g clipPath="url(#clip0_12029_1640)">
-                          <path
-                            d="M9.10326 2.31699C9.47008 1.57374 10.5299 1.57374 10.8967 2.31699L12.7063 5.98347C12.8519 6.27862 13.1335 6.48319 13.4592 6.53051L17.5054 7.11846C18.3256 7.23765 18.6531 8.24562 18.0596 8.82416L15.1318 11.6781C14.8961 11.9079 14.7885 12.2389 14.8442 12.5632L15.5353 16.5931C15.6754 17.41 14.818 18.033 14.0844 17.6473L10.4653 15.7446C10.174 15.5915 9.82598 15.5915 9.53466 15.7446L5.91562 17.6473C5.18199 18.033 4.32456 17.41 4.46467 16.5931L5.15585 12.5632C5.21148 12.2389 5.10393 11.9079 4.86825 11.6781L1.94038 8.82416C1.34687 8.24562 1.67438 7.23765 2.4946 7.11846L6.54081 6.53051C6.86652 6.48319 7.14808 6.27862 7.29374 5.98347L9.10326 2.31699Z"
-                            fill="#FBBF24"
-                          />
-                        </g>
-                        <defs>
-                          <clipPath id="clip0_12029_1640">
-                            <rect width={20} height={20} fill="white" />
-                          </clipPath>
-                        </defs>
-                      </svg>
-                      <svg
-                        width={20}
-                        height={20}
-                        viewBox="0 0 20 20"
-                        fill="none"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <g clipPath="url(#clip0_8480_66029)">
-                          <path
-                            d="M9.10326 2.31699C9.47008 1.57374 10.5299 1.57374 10.8967 2.31699L12.7063 5.98347C12.8519 6.27862 13.1335 6.48319 13.4592 6.53051L17.5054 7.11846C18.3256 7.23765 18.6531 8.24562 18.0596 8.82416L15.1318 11.6781C14.8961 11.9079 14.7885 12.2389 14.8442 12.5632L15.5353 16.5931C15.6754 17.41 14.818 18.033 14.0844 17.6473L10.4653 15.7446C10.174 15.5915 9.82598 15.5915 9.53466 15.7446L5.91562 17.6473C5.18199 18.033 4.32456 17.41 4.46467 16.5931L5.15585 12.5632C5.21148 12.2389 5.10393 11.9079 4.86825 11.6781L1.94038 8.82416C1.34687 8.24562 1.67438 7.23765 2.4946 7.11846L6.54081 6.53051C6.86652 6.48319 7.14808 6.27862 7.29374 5.98347L9.10326 2.31699Z"
-                            fill="#F3F4F6"
-                          />
-                        </g>
-                        <defs>
-                          <clipPath id="clip0_8480_66029">
-                            <rect width={20} height={20} fill="white" />
-                          </clipPath>
-                        </defs>
-                      </svg>
+                      <ProductRating rating={avgRating} />
                     </div>
                     <span className="pl-2 font-normal leading-7 text-orange-400  text-sm ">
-                      1624 review
+                      {`${filteredReviews.length} review(s)`}
                     </span>
                   </div>
                 </div>
@@ -542,25 +463,7 @@ function ProductPage(props) {
 
 
                 </div>
-                <div className="flex items-center gap-3">
-                  <button className="group transition-all duration-500 p-4 rounded-full bg-indigo-50 hover:bg-indigo-100 hover:shadow-sm hover:shadow-indigo-300">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width={26}
-                      height={26}
-                      viewBox="0 0 26 26"
-                      fill="none"
-                    >
-                      <path
-                        d="M4.47084 14.3196L13.0281 22.7501L21.9599 13.9506M13.0034 5.07888C15.4786 2.64037 19.5008 2.64037 21.976 5.07888C24.4511 7.5254 24.4511 11.4799 21.9841 13.9265M12.9956 5.07888C10.5204 2.64037 6.49824 2.64037 4.02307 5.07888C1.54789 7.51738 1.54789 11.4799 4.02307 13.9184M4.02307 13.9184L4.04407 13.939M4.02307 13.9184L4.46274 14.3115"
-                        stroke="#4F46E5"
-                        strokeWidth="1.6"
-                        strokeMiterlimit={10}
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                    </svg>
-                  </button>
+                <div className="flex items-center gap-3 *:">
                   <button onClick={handleBuyNow} className="text-center w-full px-5 py-4 rounded-[100px] bg-indigo-600 flex items-center justify-center font-semibold text-lg text-white shadow-sm transition-all duration-500 hover:bg-indigo-700 hover:shadow-indigo-400">
                     Buy Now
                   </button>
@@ -576,9 +479,9 @@ function ProductPage(props) {
         className=" bg-indigo-950 pt-20  sm:pt-32"
       >
         <div className="mx-auto  max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="mx-auto max-w-2xl md:text-center">
-            <h2 className="font-display  text-3xl tracking-tight text-white sm:text-4xl">
-              Product Reviews
+          <div className="mx-auto text-xs max-w-2xl md:text-center">
+            <h2 className="font-medium text-2xl tracking-tight text-white sm:text-3xl">
+              Loved by Icons, Trusted by All
             </h2>
           </div>
           <ul
@@ -607,7 +510,7 @@ function ProductPage(props) {
                     <figcaption className="relative mt-6 flex items-center justify-between border-t border-slate-100 pt-6">
                       <div>
                         <div className="font-display text-base text-slate-900">
-                          Sheryl Berge
+                          Roger Federer
                         </div>
                       </div>
                       <div className="overflow-hidden rounded-full bg-slate-50">
@@ -615,7 +518,7 @@ function ProductPage(props) {
                           alt=""
                           className="h-14 w-14 object-cover"
                           style={{ color: "transparent" }}
-                          src="https://randomuser.me/api/portraits/men/15.jpg"
+                          src="https://imageio.forbes.com/specials-images/imageserve/627bd93781d954329bc88a13/0x0.jpg?format=jpg&crop=1950,1950,x128,y435,safe&height=416&width=416&fit=bounds"
                         />
                       </div>
                     </figcaption>
@@ -645,7 +548,7 @@ function ProductPage(props) {
                     <figcaption className="relative mt-6 flex items-center justify-between border-t border-slate-100 pt-6">
                       <div>
                         <div className="font-display text-base text-slate-900">
-                          Leland Kiehn
+                          Lionel Messi
                         </div>
                       </div>
                       <div className="overflow-hidden rounded-full bg-slate-50">
@@ -653,7 +556,7 @@ function ProductPage(props) {
                           alt=""
                           className="h-14 w-14 object-cover"
                           style={{ color: "transparent" }}
-                          src="https://randomuser.me/api/portraits/women/15.jpg"
+                          src="https://imgs.search.brave.com/SafM_JUP3YFghMLJh5LHM0-cDW-XfmJ_hPLjjit7pbs/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9jZG4u/ZmNiYXJjZWxvbmFs/YXRlc3RuZXdzLmNv/bS93cC1jb250ZW50/L3VwbG9hZHMvMjAx/OS8xMi9MaW9uZWwt/TWVzc2ktcGljdHVy/ZXMuanBn"
                         />
                       </div>
                     </figcaption>
@@ -683,7 +586,7 @@ function ProductPage(props) {
                     <figcaption className="relative mt-6 flex items-center justify-between border-t border-slate-100 pt-6">
                       <div>
                         <div className="font-display text-base text-slate-900">
-                          Peter Renolds
+                          Cristiano Ronaldo
                         </div>
                       </div>
                       <div className="overflow-hidden rounded-full bg-slate-50">
@@ -691,7 +594,7 @@ function ProductPage(props) {
                           alt=""
                           className="h-14 w-14 object-cover"
                           style={{ color: "transparent" }}
-                          src="https://randomuser.me/api/portraits/men/10.jpg"
+                          src="https://hips.hearstapps.com/hmg-prod/images/cristiano-ronaldo-of-portugal-reacts-as-he-looks-on-during-news-photo-1725633476.jpg"
                         />
                       </div>
                     </figcaption>

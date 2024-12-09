@@ -8,7 +8,6 @@ import { loadStripe } from "@stripe/stripe-js";
 import { ReloadIcon } from "@radix-ui/react-icons";
 
 export default function Cart(props) {
-  const [quantity, setQuantity] = useState(1);
 
   const h = [];
 
@@ -21,9 +20,9 @@ export default function Cart(props) {
 
 
   useEffect(() => {
-
     let x = 0;
     props.cart.forEach((product) => {
+      console.log(product);
       x += (product.price * product.quantity);
     });
     setSubTotal(Math.round(x));
@@ -38,15 +37,7 @@ export default function Cart(props) {
   });
 
 
-  const increment = () => {
-    setQuantity((prevQuantity) => prevQuantity + 1);
-  };
 
-  const decrement = () => {
-    if (quantity > 1) {
-      setQuantity((prevQuantity) => prevQuantity - 1);
-    }
-  };
 
 
 

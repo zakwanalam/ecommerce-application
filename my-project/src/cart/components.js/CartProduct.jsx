@@ -7,18 +7,19 @@ function CartProduct(props) {
   console.log('product',props.product);
   
   const increment = () => {
-    setQuantity(quantity+1);
-    props.setProductQuantity(props.product.cart_item_id,quantity+1,props.index)
+    const newQuantity  = quantity+1;
+    setQuantity(newQuantity);
+    props.setProductQuantity(props.product.cart_item_id,newQuantity,props.index)
   };
   
   const decrement = () => {
     if (quantity > 1) {
-      setQuantity(quantity-1);
+      const newQuantity  = quantity-1;
+      setQuantity(newQuantity);
+      props.setProductQuantity(props.product.cart_item_id,newQuantity,props.index)
     }
   };
-  useEffect(()=>{
-    props.setProductQuantity(props.product.cart_item_id,quantity,props.index)
-  },[quantity])
+
   const obj = [{
     a:'dad',
     b:'adad',

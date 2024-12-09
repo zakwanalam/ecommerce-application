@@ -137,7 +137,7 @@ function App() {
             cartResponse.data.success === true &&
             cartResponse.data.cart != {}
           ) {
-            setCart(cartResponse.data.cart);
+            setCart((prev)=>{return cartResponse.data.cart});
           }
           await loadUserData();
         }
@@ -255,7 +255,11 @@ function App() {
      })
     }
   };
-
+  
+  useEffect(()=>{
+    console.log('mycarthello',cart);
+    
+  },[cart])
 
   const isHome = location.pathname === "/home" || location.pathname === "/product";
   const [animation, setAnimation] = useState("");
@@ -334,7 +338,7 @@ function App() {
             />
           }
         ></Route>
-        <Route path="/verify" element={<Verify />}></Route>
+        <Route path="/verify" element={<Verify setProgress={setProgress} />}></Route>
         <Route path="/login" element={<LoginForm title="Login" />}></Route>
         <Route path="/forgetPassword" element={<ForgetPassword />}></Route>
         <Route path="/cart" element={<Cart />}></Route>
