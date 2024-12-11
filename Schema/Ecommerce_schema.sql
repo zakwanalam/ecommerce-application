@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Dec 01, 2024 at 04:33 PM
+-- Generation Time: Dec 11, 2024 at 03:11 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -29,6 +29,23 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `getAvgRating` (IN `pId` INT)   BEGI
 	SELECT AVG(r.rating) from product as p 
     JOIN  reviews as r ON r.product_id=p.id 
     where p.id=pId;
+END$$
+
+CREATE DEFINER=`root`@`localhost` PROCEDURE `update_product_sales` ()   begin
+	update product p set p.sales = (
+    select sum(s.sales_count) from product p 
+    join stock s where p.id  = s.product_id group by p.id
+     );
+end$$
+
+CREATE DEFINER=`root`@`localhost` PROCEDURE `update_sales_count` (IN `order_quantity` INT, IN `stock_item_id` INT)   BEGIN
+    	update stock set sales_count = sales_count+order_quantity where stock.stock_item_id = stock_item_id;
+    end$$
+
+CREATE DEFINER=`root`@`localhost` PROCEDURE `update_stock` (IN `order_item_quantity` INT, IN `stock_item_id` INT)   BEGIN
+    UPDATE stock 
+    SET quantity = quantity- order_item_quantity
+    WHERE stock.stock_item_id = stock_item_id;
 END$$
 
 DELIMITER ;
@@ -70,10 +87,9 @@ CREATE TABLE `cart` (
 --
 
 INSERT INTO `cart` (`cart_item_id`, `email`, `product_id`, `quantity`, `stock_item_id`) VALUES
-(127, 'zakwanalam07@gmail.com', 3, 1, 4),
-(134, 'zakwanalam07@gmail.com', 6, 3, 12),
-(131, 'zakwanalam07@gmail.com', 8, 1, 20),
-(135, 'zakwanalam07@gmail.com', 13, 1, 49);
+(172, 'zakwanalam07@gmail.com', 3, 4, 1),
+(173, 'zakwanalam07@gmail.com', 6, 4, 10),
+(171, 'zakwanalam07@gmail.com', 8, 5, 18);
 
 -- --------------------------------------------------------
 
@@ -95,8 +111,8 @@ CREATE TABLE `orders` (
 --
 
 INSERT INTO `orders` (`order_id`, `email`, `order_date`, `status`, `total_price`, `stripe_session_id`) VALUES
-(39, 'zakwanalam07@gmail.com', '2024-11-30', 'Processing', 55.20, 'cs_test_b1BxOeDl6J6MvU4gMxUKj7MxGth2tNvhgLtWd3UWTE8kMM1xtNYe2aCbrV'),
-(38, 'zakwanalam07@gmail.com', '2024-12-01', 'Processing', 177.24, 'cs_test_b1zcNH1CWXtXSyBWSwAydM9wHLwYUOQWTkrssrxGNlUPMVD0g21U2Ox5wf');
+(60, 'zakwanalam07@gmail.com', '2024-12-09', 'Processing', 291.37, 'cs_test_b1UK8ZjDzATgBL4CNlM7wYQFtUx47a3Yr2uSSOavddnj9BJY8xtJJALJ3g'),
+(61, 'zakwanalam07@gmail.com', '2024-12-09', 'Processing', 291.37, 'cs_test_b1W0dlar0WIINnHIOzjaI4TBzKeJohUWfUTkE73ItBoDTDW2EawBfafHQx');
 
 -- --------------------------------------------------------
 
@@ -136,14 +152,23 @@ CREATE TABLE `order_items` (
 --
 
 INSERT INTO `order_items` (`order_item_id`, `stripe_session_id`, `stock_item_id`, `quantity`, `unit_price`) VALUES
-(50, 'cs_test_b1zcNH1CWXtXSyBWSwAydM9wHLwYUOQWTkrssrxGNlUPMVD0g21U2Ox5wf', 4, 1, 28),
-(51, 'cs_test_b1zcNH1CWXtXSyBWSwAydM9wHLwYUOQWTkrssrxGNlUPMVD0g21U2Ox5wf', 12, 3, 23),
-(52, 'cs_test_b1zcNH1CWXtXSyBWSwAydM9wHLwYUOQWTkrssrxGNlUPMVD0g21U2Ox5wf', 20, 1, 24),
-(53, 'cs_test_b1zcNH1CWXtXSyBWSwAydM9wHLwYUOQWTkrssrxGNlUPMVD0g21U2Ox5wf', 49, 1, 27),
-(54, 'cs_test_b1BxOeDl6J6MvU4gMxUKj7MxGth2tNvhgLtWd3UWTE8kMM1xtNYe2aCbrV', 4, 1, 28),
-(55, 'cs_test_b1BxOeDl6J6MvU4gMxUKj7MxGth2tNvhgLtWd3UWTE8kMM1xtNYe2aCbrV', 12, 3, 23),
-(56, 'cs_test_b1BxOeDl6J6MvU4gMxUKj7MxGth2tNvhgLtWd3UWTE8kMM1xtNYe2aCbrV', 20, 1, 24),
-(57, 'cs_test_b1BxOeDl6J6MvU4gMxUKj7MxGth2tNvhgLtWd3UWTE8kMM1xtNYe2aCbrV', 49, 1, 27);
+(108, 'cs_test_b1UK8ZjDzATgBL4CNlM7wYQFtUx47a3Yr2uSSOavddnj9BJY8xtJJALJ3g', 1, 4, 23),
+(109, 'cs_test_b1UK8ZjDzATgBL4CNlM7wYQFtUx47a3Yr2uSSOavddnj9BJY8xtJJALJ3g', 10, 4, 18),
+(110, 'cs_test_b1UK8ZjDzATgBL4CNlM7wYQFtUx47a3Yr2uSSOavddnj9BJY8xtJJALJ3g', 18, 5, 17),
+(111, 'cs_test_b1W0dlar0WIINnHIOzjaI4TBzKeJohUWfUTkE73ItBoDTDW2EawBfafHQx', 1, 4, 23),
+(112, 'cs_test_b1W0dlar0WIINnHIOzjaI4TBzKeJohUWfUTkE73ItBoDTDW2EawBfafHQx', 10, 4, 18),
+(113, 'cs_test_b1W0dlar0WIINnHIOzjaI4TBzKeJohUWfUTkE73ItBoDTDW2EawBfafHQx', 18, 5, 17);
+
+--
+-- Triggers `order_items`
+--
+DELIMITER $$
+CREATE TRIGGER `update_stock_trigger` BEFORE INSERT ON `order_items` FOR EACH ROW BEGIN
+call  UPDATE_STOCK(NEW.quantity,NEW.stock_item_id);
+call  UPDATE_SALES_COUNT(NEW.quantity,NEW.stock_item_id);
+END
+$$
+DELIMITER ;
 
 -- --------------------------------------------------------
 
@@ -179,6 +204,18 @@ INSERT INTO `product` (`id`, `name`, `image_main`, `description`, `category`, `s
 -- --------------------------------------------------------
 
 --
+-- Stand-in structure for view `product_sales_view`
+-- (See below for the actual view)
+--
+CREATE TABLE `product_sales_view` (
+`product_id` int(11)
+,`product_name` varchar(60)
+,`product_sales` decimal(32,0)
+);
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `reviews`
 --
 
@@ -190,14 +227,6 @@ CREATE TABLE `reviews` (
   `review_text` text DEFAULT NULL,
   `date` date DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
-
---
--- Dumping data for table `reviews`
---
-
-INSERT INTO `reviews` (`review_id`, `email`, `product_id`, `rating`, `review_text`, `date`) VALUES
-(7, 'zakwanalam07@gmail.com', 8, 5, 'Wonderful Product!!', '2024-11-17'),
-(8, 'zakwanalam07@gmail.com', 8, 5, 'Excellent comfort!', '2024-11-17');
 
 -- --------------------------------------------------------
 
@@ -219,7 +248,7 @@ CREATE TABLE `stock` (
 --
 
 INSERT INTO `stock` (`stock_item_id`, `product_id`, `size`, `price`, `quantity`, `sales_count`) VALUES
-(1, 3, 42, 23, 120, 0),
+(1, 3, 42, 23, 68, 44),
 (2, 3, 43, 26, 150, 0),
 (4, 3, 44, 28, 110, 0),
 (5, 3, 45, 31, 110, 0),
@@ -227,11 +256,11 @@ INSERT INTO `stock` (`stock_item_id`, `product_id`, `size`, `price`, `quantity`,
 (7, 4, 43, 22, 120, 0),
 (8, 4, 44, 25, 130, 0),
 (9, 4, 45, 30, 110, 0),
-(10, 6, 42, 18, 90, 0),
+(10, 6, 42, 18, 54, 36),
 (11, 6, 43, 21, 95, 0),
 (12, 6, 44, 23, 100, 0),
 (13, 6, 45, 28, 105, 0),
-(18, 8, 42, 17, 110, 0),
+(18, 8, 42, 17, 45, 55),
 (19, 8, 43, 19, 120, 0),
 (20, 8, 44, 24, 125, 0),
 (21, 8, 45, 29, 130, 0),
@@ -265,8 +294,8 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`email`, `fullName`, `address`, `profile_picture`, `password`, `expiry`, `verifyCode`, `isVerified`) VALUES
-('farah.jabeen29000@gmail.com', 'Zakwan Alam', 'R267sector8', 'https://avatars.githubusercontent.com/u/124599?v=4', '$2a$10$dUlwyuTnAGWwts2hY2xUC.tZHpmnT34ljuhsIRLg7rEmWA1jfLjCG', '2024-10-03', 0, 1),
-('zakwanalam07@gmail.com', 'Zakwan Alam', 'R267 Sector 8 North Karachi', 'https://avatars.githubusercontent.com/u/124599?v=4', '$2a$10$Y1Xp5Jw2uyTYYe9dOnBzHOTThq0NbxPWA5T8NRhOW477IL1KpwyUu', '2024-11-17', 0, 1);
+('k224229@nu.edu.pk', 'Zakwan Alam', 'R267sector8', 'https://avatars.githubusercontent.com/u/124599?v=4', '$2a$10$61byQT9Mhe5Td6JJF1HBruCDzUzVhJ5LE0GRo3mGN5SwT6lM.OZJK', '2024-12-09', 0, 1),
+('zakwanalam07@gmail.com', 'Zakwan Alam', 'R267sector8', 'https://avatars.githubusercontent.com/u/124599?v=4', '$2a$10$NcXzadAYMfQEv3UIw6JoV.tGm2687PeEi0OdOXnE3ynmexfgcPdNW', '2024-12-05', 0, 1);
 
 -- --------------------------------------------------------
 
@@ -276,6 +305,15 @@ INSERT INTO `users` (`email`, `fullName`, `address`, `profile_picture`, `passwor
 DROP TABLE IF EXISTS `orderview`;
 
 CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `orderview`  AS   (select `o`.`stripe_session_id` AS `stripe_session_id`,`u`.`email` AS `email`,`u`.`fullName` AS `fullName`,`p`.`id` AS `product_id`,`p`.`name` AS `product_name`,`o`.`unit_price` AS `unit_price`,`o`.`subtotal` AS `subtotal`,`s`.`size` AS `size`,`o`.`quantity` AS `quantity` from ((((`orders` `o2` join `order_items` `o` on(`o2`.`stripe_session_id` = `o`.`stripe_session_id`)) join `stock` `s` on(`o`.`stock_item_id` = `s`.`stock_item_id`)) join `product` `p` on(`s`.`product_id` = `p`.`id`)) join `users` `u` on(`o2`.`email` = `u`.`email`)))  ;
+
+-- --------------------------------------------------------
+
+--
+-- Structure for view `product_sales_view`
+--
+DROP TABLE IF EXISTS `product_sales_view`;
+
+CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `product_sales_view`  AS   (select `p`.`id` AS `product_id`,`p`.`name` AS `product_name`,sum(`s`.`sales_count`) AS `product_sales` from (`product` `p` join `stock` `s`) where `p`.`id` = `s`.`product_id` group by `p`.`id`)  ;
 
 --
 -- Indexes for dumped tables
@@ -348,19 +386,19 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT for table `cart`
 --
 ALTER TABLE `cart`
-  MODIFY `cart_item_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=136;
+  MODIFY `cart_item_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=179;
 
 --
 -- AUTO_INCREMENT for table `orders`
 --
 ALTER TABLE `orders`
-  MODIFY `order_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=40;
+  MODIFY `order_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=62;
 
 --
 -- AUTO_INCREMENT for table `order_items`
 --
 ALTER TABLE `order_items`
-  MODIFY `order_item_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=58;
+  MODIFY `order_item_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=114;
 
 --
 -- AUTO_INCREMENT for table `product`
@@ -372,7 +410,7 @@ ALTER TABLE `product`
 -- AUTO_INCREMENT for table `reviews`
 --
 ALTER TABLE `reviews`
-  MODIFY `review_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+  MODIFY `review_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
 
 --
 -- AUTO_INCREMENT for table `stock`
