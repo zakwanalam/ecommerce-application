@@ -45,6 +45,8 @@ search functionality, a shopping cart, and order management.
 ![image](https://github.com/user-attachments/assets/26353d29-5073-423f-b2eb-aab05b157ad8)
 ![image](https://github.com/user-attachments/assets/83217900-06ff-4702-a13a-fd7be3196598)
 ![image](https://github.com/user-attachments/assets/be325d9b-301a-446f-9730-6dc90c4dfdbb)
+![image](https://github.com/user-attachments/assets/82b71387-4bb2-4345-88f9-76646c8e62f6)
+![image](https://github.com/user-attachments/assets/4554cfb5-11db-46bb-8ee6-35172d12de3e)
 
 
 ## Screenshots (Admin Dashboard)
