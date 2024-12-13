@@ -33,6 +33,7 @@ search functionality, a shopping cart, and order management.
 - Tailwind CSS (Styling)
 - Node.js (Backend API)
 - [Shadcn/UI](https://ui.shadcn.com/)
+- Stripe (Payment Gateway)
 - Firebase (only image uploads)
 - MySQL (Xampp Server) (Database)
 
