@@ -341,7 +341,7 @@ function App() {
         <Route path="/verify" element={<Verify setProgress={setProgress} />}></Route>
         <Route path="/login" element={<LoginForm title="Login" />}></Route>
         <Route path="/forgetPassword" element={<ForgetPassword />}></Route>
-        <Route path="/cart" element={<Cart />}></Route>
+        <Route path="/cart" element={<Cart />} ></Route>
         <Route path="/editProfile" element={<EditProfile setProgress={setProgress} />}></Route>
         <Route path="/product" element={<ProductPage addToCart={addToCart} setProgress={setProgress} loginStatus={loginLabel} />} ></Route>
       </Routes>

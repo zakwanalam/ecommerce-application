@@ -108,7 +108,7 @@ function EditProfile({setProgress}) {
           </div>
           <div class="flex px-5 flex-col w-screen text-left gap-6">
             <h2 class="text-3xl font-bold max-sm:text-center text-gray-800 mb-6">
-              Account Settings
+              Account Information
             </h2>
             <div>
               <label for="email" class="block text-gray-700 font-bold mb-2">
