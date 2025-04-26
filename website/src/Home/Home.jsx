@@ -5,7 +5,11 @@ import Cart from "@/cart/cart";
 import RecentProducts from "./components/RecentProducts";
 import Navbar from "./components/navbar";
 import ProductPage from "@/ProductPage/product";
+import { Toaster } from "@/components/ui/toaster";
+import { toast, useToast } from "@/components/ui/use-toast";
 function Home(props) {
+
+
   return (
     <React.Fragment>
       <Hero
@@ -24,12 +28,13 @@ function Home(props) {
         category = {props.category}
         setCategory = {props.setCategory}
         setProgress={props.setProgress}
+        toast={toast}
         isProductSelected={props.isProductSelected}
       />
       <div style={{ zIndex: "-20" }}>
         <CarouselSlider />
       </div>
-
+      <Toaster className="fixed top-4 right-4 z-[9999]" />
     </React.Fragment>
   );
 }

@@ -12,14 +12,14 @@ function Product(props) {
   const product = props.product;
   const productStock = product.stock;
   const query = {
-    index:props.index,
+    index: props.index,
     id: product.id,
     name: product.name,
     price: product.stock[0].price,
-    stock:product.stock,
+    stock: product.stock,
     image: product.image_main,
-    secondaryImage1:product.image_secondary_1,
-    secondaryImage2:product.image_secondary_2,
+    secondaryImage1: product.image_secondary_1,
+    secondaryImage2: product.image_secondary_2,
     description: product.description,
   };
 
@@ -44,7 +44,7 @@ function Product(props) {
             className=" mx-3  relative mt-3 flex sm:h-64 max-sm:h-32 overflow-hidden cursor-pointer rounded-xl"
             onClick={() => {
               props.isProductSelected();
-              loadingNavigation('/product',query)
+              loadingNavigation('/product', query)
             }}
           >
             <img
@@ -65,7 +65,7 @@ function Product(props) {
               39% OFF
             </span>
           </div>
-      
+
           <div className="mt-4 px-5 pb-5">
             <a>
               <h5 className="text-xl text-slate-800 tracking-tight text-slate-900">
@@ -136,10 +136,10 @@ function Product(props) {
             </div>
             <a
               onClick={() => {
-                props.addToCart(props.product.id,props.index,
-                  props.product.stock[0].stock_item_id, props.product.stock[0].price,1,props.product.stock[0].size);
-                toast({
-                  title:`Item Added: ${query.name}`
+                props.addToCart(props.product.id, props.index,
+                  props.product.stock[0].stock_item_id, props.product.stock[0].price, 1, props.product.stock[0].size);
+                props.toast({
+                  title: `Item Added: ${query.name}`
                 })
               }}
               className="flex cursor-pointer items-center justify-center rounded-md max-sm:text-xs  bg-indigo-700 px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-indigo-500 focus:outline-none focus:ring-4 focus:ring-blue-300"
@@ -160,12 +160,10 @@ function Product(props) {
               </svg>
               Add to cart
             </a>
-            
+
           </div>
         </div>
       </div>
-      <Toaster/>
-
     </>
   );
 }

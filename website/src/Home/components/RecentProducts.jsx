@@ -66,6 +66,7 @@ function RecentProducts(props) {
                       addToCart={props.addToCart}
                       product={product}
                       setProgress={props.setProgress}
+                      toast={props.toast}
                       key={i}
                       index={i}
                     />

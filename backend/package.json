@@ -14,6 +14,7 @@
   "dependencies": {
     "@stripe/stripe-js": "^4.1.0",
     "axios": "^1.7.2",
+    "backend": "file:",
     "bcryptjs": "^2.4.3",
     "body-parser": "^1.20.2",
     "cookie-parser": "^1.4.6",

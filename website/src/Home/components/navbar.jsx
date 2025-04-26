@@ -127,6 +127,7 @@ function Navbar(props) {
             </li>
             <li
               className=" pl-10"
+              id="cartIcon"
               hidden={props.loginStatus === "Login" ? true : false}
               onClick={() => {
                 props.setShowCart();

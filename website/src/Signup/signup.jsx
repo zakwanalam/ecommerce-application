@@ -109,6 +109,7 @@ function Signup() {
             <input
               className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
               type="password"
+              name="password"
               required={true}
               onChange={(e)=>{setConfirmPassword(e.target.value)}}
               placeholder="Enter your password"
@@ -124,7 +125,7 @@ function Signup() {
             <input
               className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
               type="password"
-              name="password"
+              name="confirmPassword"
               placeholder="Confirm your password"
               required={true}
               onChange={handleInputChange}
