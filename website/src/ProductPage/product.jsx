@@ -349,7 +349,7 @@ function ProductPage(props) {
                   Size
                 </p>
                 <div className="w-full pb-8 border-b border-gray-100 flex-wrap">
-                  <div className=":bg-orange-500  grid grid-cols-3 min-[400px]:grid-cols-5 gap-3 max-w-md">
+                  <div id="productSizes" className=":bg-orange-500  grid grid-cols-3 min-[400px]:grid-cols-5 gap-3 max-w-md">
                     {stock.length ?
                       stock.map((variant) => {
                         return (
@@ -464,7 +464,7 @@ function ProductPage(props) {
 
                 </div>
                 <div className="flex items-center gap-3 *:">
-                  <button onClick={handleBuyNow} className="text-center w-full px-5 py-4 rounded-[100px] bg-indigo-600 flex items-center justify-center font-semibold text-lg text-white shadow-sm transition-all duration-500 hover:bg-indigo-700 hover:shadow-indigo-400">
+                  <button id="buynow" onClick={handleBuyNow} className="text-center w-full px-5 py-4 rounded-[100px] bg-indigo-600 flex items-center justify-center font-semibold text-lg text-white shadow-sm transition-all duration-500 hover:bg-indigo-700 hover:shadow-indigo-400">
                     Buy Now
                   </button>
                 </div>

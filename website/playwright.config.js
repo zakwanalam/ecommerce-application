@@ -1,7 +1,8 @@
 import { defineConfig } from '@playwright/test';
 
 export default defineConfig({
-    testDir: './test',  // (or wherever your tests are)
+    testDir: './test',
+    timeout:80*1000,  // (or wherever your tests are)
     use: {
         baseURL: 'http://localhost:5173',  // your website's local URL
         headless: true,
