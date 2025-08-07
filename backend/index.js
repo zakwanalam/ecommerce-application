@@ -49,6 +49,7 @@ export const db = mysql.createConnection({
   user: "root",
   database: "test",
 });
+
 db.connect((err) => {
   if (err) {
     console.error("error connecting: " + err.stack);
@@ -99,7 +100,7 @@ app.post("/api/saveReview", (req, res) => {
 app.get("/api/getReviews", (req, res) => {
   //review query
   const query = ` SELECT 
-                  u.profile_picture, 
+                  u.profile_picture,
                   r.product_id, 
                   r.review_id,
                   r.date, 
@@ -133,6 +134,7 @@ app.get("/api/getReviews", (req, res) => {
     console.log("Could Not Fetch Reviews", error);
   }
 });
+
 app.delete("/api/deleteReview", (req, res) => {
   const { id } = req.query;
   const query = `DELETE from reviews where review_id=${id}`;
@@ -149,6 +151,7 @@ app.delete("/api/deleteReview", (req, res) => {
     res.send({ success: false });
   }
 });
+
 app.get("/api/getSessions", async (req, res) => {
   const sessions = await stripe.checkout.sessions.list({ limit: 16 });
 
@@ -183,7 +186,6 @@ app.get('/api/getOrders', (req, res) => {
                   resolve(productResult); // Resolve with the product result
                 }
               });
-
             });
             filteredLineItems.forEach((item) => {
               productResult.push(item)
