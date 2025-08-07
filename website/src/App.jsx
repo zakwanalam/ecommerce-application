@@ -6,6 +6,7 @@ import Signup from "./Signup/signup";
 import Verify from "./verify/verify";
 import {
   BrowserRouter,
+  Navigate,
   Route,
   Router,
   RouterProvider,
@@ -319,6 +320,7 @@ function App() {
         </>
       )}
       <Routes>
+        <Route path="/" element={<Navigate to={'/home'}/>}/>
         <Route path="/signup" element={<Signup />}></Route>
         <Route
           path="/home"

@@ -765,8 +765,8 @@ app.post("/api/checkout", async (req, res) => {
       payment_method_types: ["card"],
       line_items: lineItems,
       mode: "payment",
-      success_url: "http://localhost:3000/api/storeOrder?session_id={CHECKOUT_SESSION_ID}",
-      cancel_url: "http://localhost:5173/paymentFail",
+      success_url: `http://${process.SERVER_IP}:3000/api/storeOrder?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `http://${process.SERVER_IP}:5173/paymentFail`,
       billing_address_collection: "required",
       phone_number_collection: {
         enabled: true, // Enable phone number collection
