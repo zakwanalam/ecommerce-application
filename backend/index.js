@@ -45,11 +45,12 @@ app.use(cookieParser());
 app.use(e.json({ limit: "50mb" }));
 app.use(bodyParser.urlencoded({ limit: "50mb", extended: true }));
 export const db = mysql.createConnection({
-  host: "localhost",
-  user: "root",
-  database: "test",
+  host: process.env.MYSQL_HOST,
+  port: process.env.MYSQL_PORT,
+  user: process.env.MYSQL_USER,
+  password: process.env.MYSQL_PASSWORD,
+  database: process.env.MYSQL_DATABASE,
 });
-
 db.connect((err) => {
   if (err) {
     console.error("error connecting: " + err.stack);
