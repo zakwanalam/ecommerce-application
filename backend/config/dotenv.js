@@ -1,0 +1,34 @@
+import dotenv from "dotenv";
+dotenv.config();
+
+export const {
+  // Server
+  PORT,
+  SERVER_IP,
+
+  // JWT
+  JWT_SECRET,
+  TOKEN_EXPIRY,
+
+  // MySQL
+  DB_HOST,
+  DB_USER,
+  DB_NAME,
+
+  // Firebase
+  FIREBASE_API_KEY,
+  FIREBASE_AUTH_DOMAIN,
+  FIREBASE_PROJECT_ID,
+  FIREBASE_STORAGE_BUCKET,
+  FIREBASE_MESSAGING_SENDER_ID,
+  FIREBASE_APP_ID,
+  FIREBASE_MEASUREMENT_ID,
+
+  // Stripe
+  STRIPE_SECRET_KEY,
+
+  // Email
+  EMAIL_USER,
+  EMAIL_PASS_VERIFY,
+  EMAIL_PASS_ORDER,
+} = process.env;

@@ -8,7 +8,7 @@ export default defineConfig({
     host: '0.0.0.0',
     port: 5173,
     proxy: {
-        '/api': 'https://backend-production-03e7c.up.railway.app'
+      '/api': 'http://localhost:3000'
     }
   },
   plugins: [react()],
