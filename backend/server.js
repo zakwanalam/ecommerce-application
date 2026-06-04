@@ -18,8 +18,10 @@ registerRoutes(app);
 
 // ── Start Server ──────────────────────────────────────────────
 const { PORT } = process.env;
-app.listen(PORT || 3000, () => {
-  console.log(`app is running on port ${PORT || 3000}`);
-});
+if (process.env.NODE_ENV !== "production") {
+  app.listen(PORT || 3000, () => {
+    console.log(`app is running on port ${PORT || 3000}`);
+  });
+}
 
 export default app;
