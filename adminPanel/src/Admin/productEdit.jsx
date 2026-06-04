@@ -58,12 +58,18 @@ function ProductEdit() {
       }
     );
   });
-  const [imageHidden, setImageHidden] = useState(true);
-  const [imageHidden2, setImageHidden2] = useState(true);
-  const [imageHidden3, setImageHidden3] = useState(true);
-  const [stock, setStock] = useState(product.stock)
   const placeholder =
     "https://upload.wikimedia.org/wikipedia/commons/3/3f/Placeholder_view_vector.svg";
+  const [imageHidden, setImageHidden] = useState(
+    product.image_main && product.image_main !== placeholder
+  );
+  const [imageHidden2, setImageHidden2] = useState(
+    product.image_secondary_1 ? true : false
+  );
+  const [imageHidden3, setImageHidden3] = useState(
+    product.image_secondary_2 ? true : false
+  );
+  const [stock, setStock] = useState(product.stock)
   useEffect(() => console.log(product), [product]);
 
   const handleChange = (e) => {

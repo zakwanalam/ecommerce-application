@@ -39,7 +39,7 @@ function RecentProducts(props) {
         <FilterComboBox category={props.category} setCategory={props.setCategory} />
         <SortComboBox sortType = {props.sortType} setSortType={props.setSortType} />
       </div>
-      <div className={`pb-10 flex lg:px-20 bg-indigo-950  items-center justify-center flex-wrap gap-2 `}>
+      <div className={`pb-10 flex lg:px-20 bg-indigo-950 items-center justify-center flex-wrap gap-8`}>
         {props.productList === null ? <Popup /> : props.productList
           .filter((product) => { return product.category.toLowerCase() === props.category || props.category === 'all' })
           .sort((a,b)=>
@@ -59,8 +59,7 @@ function RecentProducts(props) {
             {
               return (
                 <>
-                  <div ref={observerRef} style={{ zIndex: "0" }} id="recentProducts" className={` pt-6  ${i % 2 === 0 ? "lg:mx-20" : null}
- `}>
+                  <div ref={observerRef} style={{ zIndex: "0" }} id="recentProducts" className={`pt-6`}>
                     <Product
                       isProductSelected={props.isProductSelected}
                       addToCart={props.addToCart}

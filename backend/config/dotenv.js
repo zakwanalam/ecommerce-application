@@ -27,6 +27,11 @@ export const {
   // Stripe
   STRIPE_SECRET_KEY,
 
+  // Cloudinary
+  CLOUDINARY_CLOUD_NAME,
+  CLOUDINARY_API_KEY,
+  CLOUDINARY_API_SECRET,
+
   // Email
   EMAIL_USER,
   EMAIL_PASS_VERIFY,

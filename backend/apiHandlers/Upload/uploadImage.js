@@ -1,23 +1,18 @@
-import { storageRef, getDownloadURL, ref, uploadString } from "../../config/firebase.js";
+import cloudinary from "../../config/cloudinary.js";
 
-const uploadImage = (req, res) => {
+const uploadImage = async (req, res) => {
   const { dataurl } = req.body;
-  let fileExtension = "";
 
-  if (dataurl.startsWith("data:image/jpeg")) {
-    fileExtension = "jpg";
-  } else if (dataurl.startsWith("data:image/png")) {
-    fileExtension = "png";
+  try {
+    const result = await cloudinary.uploader.upload(dataurl, {
+      folder: "images",
+    });
+    console.log("Uploaded to Cloudinary:", result.secure_url);
+    res.send({ url: result.secure_url });
+  } catch (error) {
+    console.error("Cloudinary upload failed:", error);
+    res.status(500).send({ error: "Image upload failed" });
   }
-  const randomName = Math.round(Math.random() * 100000);
-  const imagesRef = ref(storageRef, `${randomName}.${fileExtension}`);
-
-  uploadString(imagesRef, dataurl, "data_url").then(async (snapshot) => {
-    console.log("Uploaded a data_url string!");
-    const url = await getDownloadURL(snapshot.ref);
-    console.log(url);
-    res.send({ url });
-  });
 };
 
 export default uploadImage;
