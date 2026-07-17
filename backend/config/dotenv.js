@@ -13,7 +13,9 @@ export const {
   // MySQL
   DB_HOST,
   DB_USER,
+  DB_PASSWORD,
   DB_NAME,
+  DB_PORT,
 
   // Firebase
   FIREBASE_API_KEY,

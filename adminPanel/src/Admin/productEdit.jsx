@@ -1,4 +1,4 @@
-import { ChevronLeft, Cross, PlusCircle, Upload } from "lucide-react";
+import { ChevronLeft, Cross, PlusCircle, Upload, X } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
 import { Button } from "@/components/ui/button";
@@ -143,6 +143,29 @@ function ProductEdit() {
         console.log("Data url", dataurl);
       };
       reader.readAsDataURL(file);
+    }
+  };
+
+  const handleRemoveImage = async (imageKey) => {
+    const imageUrl = product[imageKey];
+    if (imageUrl && imageUrl !== placeholder) {
+      try {
+        await axios.post("/api/removeImage", { imageUrl });
+        console.log("Image removed from storage:", imageKey);
+      } catch (error) {
+        console.error("Error removing image from storage:", error);
+      }
+    }
+    setProduct((prev) => ({
+      ...prev,
+      [imageKey]: imageKey === "image_main" ? placeholder : "",
+    }));
+    if (imageKey === "image_main") {
+      setImageHidden(true);
+    } else if (imageKey === "image_secondary_1") {
+      setImageHidden2(true);
+    } else if (imageKey === "image_secondary_2") {
+      setImageHidden3(true);
     }
   };
 
@@ -426,6 +449,19 @@ function ProductEdit() {
               <CardContent>
                 <div className="grid gap-3 relative">
                   <div className=" relative aspect-square w-60 max-lg:w-48 max-lg:ml-1 ">
+                    {product.image_main && product.image_main !== placeholder && (
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleRemoveImage("image_main");
+                        }}
+                        className="absolute top-2 right-2 z-10 bg-red-500 hover:bg-red-600 text-white rounded-full p-1 shadow-md transition-colors"
+                        title="Remove image"
+                      >
+                        <X className="h-4 w-4" />
+                      </button>
+                    )}
                     <img
                       alt="Product image"
                       hidden={imageHidden}
@@ -466,6 +502,19 @@ function ProductEdit() {
 
                   <div className="grid grid-cols-3 gap-2 max-lg:mx-1 ">
                     <div className="relative flex w-18 aspect-square ">
+                      {product.image_secondary_1 && product.image_secondary_1 !== placeholder && (
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleRemoveImage("image_secondary_1");
+                          }}
+                          className="absolute -top-1.5 -right-1.5 z-10 bg-red-500 hover:bg-red-600 text-white rounded-full p-0.5 shadow-sm transition-colors"
+                          title="Remove image"
+                        >
+                          <X className="h-3 w-3" />
+                        </button>
+                      )}
                       <img
                         alt="Product image"
                         className="aspect-square cursor-pointer w-full rounded-md object-cover"
@@ -500,6 +549,19 @@ function ProductEdit() {
                       ></div>
                     </div>
                     <div className="relative flex w-18 aspect-square">
+                      {product.image_secondary_2 && product.image_secondary_2 !== placeholder && (
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleRemoveImage("image_secondary_2");
+                          }}
+                          className="absolute -top-1.5 -right-1.5 z-10 bg-red-500 hover:bg-red-600 text-white rounded-full p-0.5 shadow-sm transition-colors"
+                          title="Remove image"
+                        >
+                          <X className="h-3 w-3" />
+                        </button>
+                      )}
                       <img
                         alt="Product image"
                         className="aspect-square cursor-pointer w-full rounded-md object-cover"
